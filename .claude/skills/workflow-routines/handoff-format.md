@@ -170,6 +170,8 @@ Handoff writes **must** use **git commit + push** on **`workflow/state`** via gi
 
 ### Ensure state branch
 
+During **clarify**, `wfr clarify init` runs this internally — you don't run it by hand there. Kept here as the reference recipe (still used by `/workflow-init` and other phases):
+
 ```bash
 git fetch origin
 if git rev-parse --verify origin/workflow/state >/dev/null 2>&1; then
@@ -187,22 +189,18 @@ fi
 
 ### Clarify start (state branch first)
 
-After label swap to `workflow:clarify`:
+After label swap to `workflow:clarify` (`wfr label swap --issue {n} --from workflow:start --to workflow:clarify`):
 
 1. Read issue; verify `workflow/PROJECT.md` exists on `base_branch` (`git show origin/{base_branch}:workflow/PROJECT.md`).
-2. Ensure `workflow/state` (above); **stay checked out on it**; write initial handoff:
+2. Ensure `workflow/state`, write initial handoff, and commit + push — one call:
 
 ```bash
-mkdir -p issues/{n}
-# write state.json, task.md, language.md, requirements.md (initial shell)
-# create empty metrics.jsonl for analytics (append-only later)
-: > issues/{n}/metrics.jsonl
-git add issues/{n}/
-git commit -m "workflow(issue-{n}): clarify — init handoff"
-git push origin workflow/state
+wfr clarify init --issue {n} --issue-url {issue_url} --title "{title}" --base-branch {base_branch} --body "{issue body}"
 ```
 
-3. Post short session comment with **both markdown links** (session + state tree). See **Clarify start**.
+This writes `state.json`, `task.md`, `language.md`, `requirements.md` (initial shell), and an empty `metrics.jsonl` under `issues/{n}/`, then commits with message `workflow(issue-{n}): clarify — init handoff` and pushes.
+
+3. Post short session comment with **both markdown links** (session + state tree) via `wfr issue comment --issue {n} --body "{text}"`. See **Clarify start**.
 4. Ask first question **in the session** (not as an issue comment). Wait for the human's **session** reply.
 
 **Reading product code during clarify:** working tree is `workflow/state` (no app source). Use `git show origin/{base_branch}:path` / `git ls-tree` — do not checkout `base_branch`.
@@ -210,42 +208,45 @@ git push origin workflow/state
 ### Clarify Q&A (each human session answer)
 
 1. Read the answer from the **session** — do not wait for or use issue-thread replies.
-2. On `workflow/state`, update files under `issues/{n}/`.
-3. **Append one `clarify_turn` line** to `issues/{n}/metrics.jsonl` — category + recommendation outcome per [metrics.md](metrics.md). Never rewrite prior lines.
-4. Commit and push:
+2. On `workflow/state`, edit `requirements.md` / `language.md` under `issues/{n}/` — model-authored prose, not CLI-generated.
+3. Log the turn — appends one validated `clarify_turn` line to `issues/{n}/metrics.jsonl` (category + recommendation outcome per [metrics.md](metrics.md), never rewriting prior lines), updates `state.json`, and commits + pushes:
 
 ```bash
-git add issues/{n}/
-git commit -m "workflow(issue-{n}): clarify — update requirements"
-git push origin workflow/state
+wfr clarify answer --issue {n} --q-index {i} --category {category} --recommendation-outcome {outcome} --question "{question text}"
 ```
 
-5. Ask the next question in the session (or request `approve requirements` in the session).
+4. Ask the next question in the session (or request `approve requirements` in the session).
 
 ### Clarify approve
 
 1. Human says `approve requirements` **in the session**.
-2. Finalize `state.json` (`requirements_approved: true`, `status: done`, history).
-3. Commit and push handoff on `workflow/state`.
-4. Post approval comment — engaging header + `---` + **full approved `requirements.md`**. See **Clarify approve (post requirements)** above.
-5. **Swap labels last** — `workflow:implement`.
+2. One call does the rest — validates `requirements.md`, finalizes `state.json` (`requirements_approved: true`, `status: done`, history), commits + pushes `workflow/state`, posts the approval comment (engaging header + `---` + full `requirements.md`, checkbox block stripped — see **Clarify approve (post requirements)** above), and **swaps labels last** (`workflow:implement`):
+
+```bash
+wfr clarify approve --issue {n} --header "{varied, engaging header}"
+```
+
+It fails closed — if validation, the commit, or the comment post fails, the label is not swapped.
 
 ### Implement
 
-1. Checkout / pull `workflow/state`; read `issues/{n}/state.json` and siblings. Require `requirements_approved: true`.
-2. **At phase start** — update `state.json` on `workflow/state` (`phase: implement`, `work_branch`, history); commit + push.
-3. **Create work branch** (first time only):
+1. Checkout / pull `workflow/state`; read `issues/{n}/state.json` and siblings. Require `requirements_approved: true` — `wfr implement start` enforces this itself.
+2. **At phase start + create work branch (first time only)** — one call does both, and leaves you checked out on the work branch:
 
 ```bash
-git fetch origin
-git checkout -b workflow/issue-{n} origin/{base_branch}
-git push -u origin workflow/issue-{n}
+wfr implement start --issue {n} --base-branch {base_branch}
 ```
 
-4. Do phase work on `workflow/issue-{n}` (code + PROJECT.md + ADRs). **Do not** add `issues/` handoff files to the work branch.
-5. **At phase complete** — checkout `workflow/state`, write `implement-handoff.md` + update `state.json`; commit + push; open draft PR from work branch.
+This updates `state.json` on `workflow/state` (`phase: implement`, `work_branch`, history) and commits + pushes, then ensures `workflow/issue-{n}` exists — creating it from `origin/{base_branch}` if missing, reusing it (never a second work branch) if it already does.
 
-**Never create a second work branch** for the same issue. If `workflow/issue-{n}` already exists, reuse it.
+3. Do phase work on `workflow/issue-{n}` (code + PROJECT.md + ADRs). **Do not** add `issues/` handoff files to the work branch.
+4. **At phase complete** — switch to `workflow/state` (see below), write `implement-handoff.md`, then:
+
+```bash
+wfr implement complete --issue {n} --base-branch {base_branch} --pr-title "{title}" --pr-body "{body}"
+```
+
+Pushes the work branch, opens the draft PR, validates `implement-handoff.md`, updates `state.json`, commits + pushes, and prints the PR URL. It does **not** post the completion comment or swap the label — post via `wfr issue comment` (linking that PR URL) and swap via `wfr label swap --from workflow:implement --to workflow:review` as separate follow-up calls, since both need the PR URL this call creates.
 
 ### Switching between state and work branches
 
@@ -267,11 +268,23 @@ Prefer a clean working tree before switching. If needed, commit or stash work-br
 ### Review
 
 1. Pull `workflow/state`; read handoff. Checkout `work_branch` for diff/code.
-2. **At phase start** — update `state.json` on `workflow/state`; commit + push.
+2. **At phase start** — switch back to `workflow/state`:
+
+```bash
+wfr review start --issue {n}
+```
+
+Verifies implement ran (`work_branch` set), updates `state.json` (`phase: review`, history), commits + pushes.
+
 3. Review (diff + code reading only — no tests/build). Do not commit code fixes.
-4. Capture `review_head_sha` on `work_branch` (`git rev-parse HEAD`).
-5. **At phase complete** — write `review-report.md` + **`review-findings.json`** + update `state.json` (`review_head_sha`, `review_verdict`, `pr_number`) on `workflow/state`; **append one `review_completed` line** to `metrics.jsonl`; commit + push.
-6. Post short issue comment; **label swap last**.
+4. Write `review-report.md` and a draft `review-findings.json` (just `severity`/`summary`/`paths` per finding) on `workflow/state`.
+5. **At phase complete** — one call:
+
+```bash
+wfr review complete --issue {n} --verdict "{verdict}" --summary "{text}" --notes "{text}"
+```
+
+Finds the PR, validates `review-report.md`, captures `review_head_sha` from the work branch's remote tip, finalizes `review-findings.json` (ids, `required`, `pr_number`, `review_head_sha`, `created_at`), appends `review_completed` to `metrics.jsonl`, updates `state.json` (`review_head_sha`, `review_verdict`, `pr_number`), commits + pushes, posts the **one** PR comment, and **swaps labels last**. Fails closed at every step.
 
 ### Close (issue close — close routine)
 
@@ -279,7 +292,7 @@ When the issue is **closed** while labeled `workflow:human-review`, the **close 
 
 ### On handoff write failure
 
-1. Post a **short issue comment** — phase, push/commit failed, one-line error, session link.
+1. Post a **short issue comment** — phase, push/commit failed, one-line error, session link. During clarify: `wfr issue comment --issue {n} --body "{text}"`.
 2. **Stop** — do not swap labels, do not open PR.
 
 ## Read protocol

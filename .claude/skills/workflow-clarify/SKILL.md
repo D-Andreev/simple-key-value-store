@@ -19,9 +19,9 @@ Grill the plan before implementation. **No application code changes. No test run
 
 **Q&A channel is the session only.** Ask clarifying questions in the Claude Code session chat. Humans answer **in the session** — never on the GitHub issue thread. Do **not** wait for, poll, or expect issue comments as answers. `approve requirements` is also said **in the session**.
 
-**First repo action after label swap:** ensure `workflow/state` and init `issues/{n}/`. Commit handoff files on each Q&A turn. Issue comments are **agent→human status only** (session link at start; approved requirements at approve) — not a reply channel for Q&A.
+**First repo action after label swap:** `wfr clarify init` (ensures `workflow/state`, inits `issues/{n}/`). Each Q&A turn commits via `wfr clarify answer`. Issue comments are **agent→human status only**, posted via `wfr issue comment` (session link at start; approved requirements at approve) — not a reply channel for Q&A.
 
-On **`approve requirements`** (session message), final handoff commit on `workflow/state`, post **approved requirements on the issue**, swap to `workflow:implement`, stop.
+On **`approve requirements`** (session message), `wfr clarify approve` does the whole sequence in one call: final handoff commit on `workflow/state`, post **approved requirements on the issue**, swap to `workflow:implement`, stop.
 
 See [handoff-format.md](../workflow-routines/handoff-format.md), [state-schema.md](../workflow-routines/state-schema.md), [label-rules.md](../workflow-routines/label-rules.md).
 
@@ -75,17 +75,26 @@ Same as A/B.
 
 ## Start sequence (mode A)
 
-1. **Swap labels first** — `workflow:clarify`. Nothing else on GitHub before this.
+0. **Ensure the `wfr` CLI is installed** — it owns every handoff write below (state.json, metrics.jsonl, label swaps, requirements finalize) so nothing is hand-typed:
+   ```bash
+   command -v wfr >/dev/null 2>&1 || curl -fsSL https://raw.githubusercontent.com/D-Andreev/ai-workflow-routines/main/scripts/install.sh | sh
+   ```
+1. **Swap labels first**:
+   ```bash
+   wfr label swap --issue {n} --from workflow:start --to workflow:clarify
+   ```
+   Nothing else on GitHub before this.
 2. **Read issue** — number, title, body, labels, URL.
 3. **Verify init** — `workflow/PROJECT.md` on `base_branch` via `git show origin/{base_branch}:workflow/PROJECT.md`; else stop → `/workflow-init`.
-4. **Ensure `workflow/state` + initial handoff commit** (see handoff-format):
-   - Ensure-or-create long-lived `workflow/state`
-   - Write `state.json` per [fixture](../workflow-routines/fixtures/state-example-clarify-start.json)
-   - Write initial `task.md`, `language.md`, `requirements.md` under `issues/{n}/`
-   - Create empty `issues/{n}/metrics.jsonl`
-   - Commit + push `workflow/state`
-5. **Post session comment** — pick a **fresh phrasing** from handoff-format example bank (or invent one). **Must link** session + **state tree** (`…/tree/workflow/state/issues/{n}`). Reference the issue topic when natural.
-
+4. **Ensure `workflow/state` + initial handoff commit**:
+   ```bash
+   wfr clarify init --issue {n} --issue-url {issue_url} --title "{title}" --base-branch {base_branch} --body "{issue body}"
+   ```
+   One call: ensures/creates `workflow/state`, writes `state.json` per [fixture](../workflow-routines/fixtures/state-example-clarify-start.json), writes the initial `task.md`/`language.md`/`requirements.md` shells under `issues/{n}/`, creates an empty `metrics.jsonl`, and commits + pushes.
+5. **Post session comment** — pick a **fresh phrasing** from handoff-format example bank (or invent one). **Must link** session + **state tree** (`…/tree/workflow/state/issues/{n}`). Reference the issue topic when natural:
+   ```bash
+   wfr issue comment --issue {n} --body "{session comment text}"
+   ```
    Do **not** reuse the same clarify-start comment across issues.
 6. Ask **first question in the session** (chat). Do not post it as an issue comment.
 
@@ -108,66 +117,48 @@ Checkout `workflow/state`, read `issues/{n}/`, or use session comment link. Cont
 ## On human answers (session messages)
 
 1. Read the answer from the **session** (not the issue thread).
-2. Update `requirements.md`, `language.md`, `state.json` on `workflow/state`.
-3. **Append one `clarify_turn` to `metrics.jsonl`** (same commit):
-   - `category` — exactly one from [metrics.md](../workflow-routines/metrics.md#question-categories)
-   - `recommendation_outcome` — exactly one of: `skipped` | `accepted_recommendation` | `accepted_with_adjustment` | `rejected_recommendation`
-   - `q_index`, `question` text
-   - Never rewrite prior JSONL lines
-4. Commit + push `workflow/state`.
-5. Ask next question in the session, or ask for `approve requirements` in the session.
+2. Edit `requirements.md` and `language.md` on `workflow/state` — this prose stays model-authored, the CLI never writes it.
+3. Log the turn — appends the validated `clarify_turn` line to `metrics.jsonl`, bumps `state.json`, and commits + pushes `workflow/state`, all in one call:
+   ```bash
+   wfr clarify answer --issue {n} --q-index {i} --category {category} --recommendation-outcome {outcome} --question "{question text}"
+   ```
+   - `--category` — exactly one from [metrics.md](../workflow-routines/metrics.md#question-categories); `wfr` rejects anything else.
+   - `--recommendation-outcome` — exactly one of `skipped` | `accepted_recommendation` | `accepted_with_adjustment` | `rejected_recommendation`; `wfr` rejects anything else.
+   - Never rewrite prior JSONL lines — `wfr clarify answer` only appends.
+4. Ask next question in the session, or ask for `approve requirements` in the session.
 
 ## On `approve requirements` (session message)
 
-1. Verify `requirements.md` complete.
-2. Finalize `state.json` — `requirements_approved: true`, `status: done`, history.
-3. Check approval in `requirements.md`.
-4. Commit + push `workflow/state`.
-5. **Post approval comment** on the issue:
-   - **Varied header** (see handoff-format approve example bank — not always "Requirements approved")
-   - `---`
-   - **Full approved `requirements.md`**
-   ```bash
-   gh issue comment {n} --body-file /tmp/requirements-comment.md
-   ```
-6. **Swap labels last** — `workflow:implement`. **Stop.**
+One call does the whole sequence — validates `requirements.md` is complete, finalizes `state.json` (`requirements_approved: true`, `status: done`, history), commits + pushes `workflow/state`, posts the approval comment (header + `---` + full `requirements.md`, checkbox block stripped), and swaps `workflow:clarify` → `workflow:implement` **last**. It fails closed: if any step errors, later steps (including the label swap) don't run.
+
+```bash
+wfr clarify approve --issue {n} --header "{varied, engaging header — see handoff-format approve example bank, not always 'Requirements approved'}"
+```
+
+**Stop** once this succeeds. If it fails, the error says which step failed and whether the label was swapped — fix the cause and re-run rather than swapping labels by hand.
 
 ## requirements.md template
 
-```markdown
-# Requirements: issue-{number}
-
-## Original ask
-{from task.md}
-
-## Clarifications
-| # | Question | Answer | Recommended |
-|---|----------|--------|-------------|
-
-## Acceptance criteria
-- [ ] ...
-
-## Approved by human
-- [ ] Pending — say `approve requirements` in the session when ready
-```
+`wfr clarify init` generates this from [internal/handoff/templates/requirements.md.tmpl](../../internal/handoff/templates/requirements.md.tmpl) — see that file for the exact shape (`## Original ask`, `## Clarifications` table, `## Acceptance criteria`, `## Approved by human`). Don't hand-author it; edit the generated file's `## Clarifications` rows and `## Acceptance criteria` items as answers come in.
 
 ## GitHub writes (clarify)
 
-| When | Git | Issue |
-|------|-----|-------|
-| Start | Ensure `workflow/state` + init commit under `issues/{n}/` (incl. empty `metrics.jsonl`) | Session comment with **session + state tree links** |
-| Q&A turn | COMMIT + push on `workflow/state` (handoff + **append** `clarify_turn` to `metrics.jsonl`) | **None** — questions and answers stay in the session |
-| Approve | COMMIT + push on `workflow/state` | Header + **full requirements.md** → label swap last |
+| When | Git | Issue | Via |
+|------|-----|-------|-----|
+| Start | Ensure `workflow/state` + init commit under `issues/{n}/` (incl. empty `metrics.jsonl`) | Session comment with **session + state tree links** | `wfr label swap` → `wfr clarify init` → `wfr issue comment` |
+| Q&A turn | COMMIT + push on `workflow/state` (handoff + **append** `clarify_turn` to `metrics.jsonl`) | **None** — questions and answers stay in the session | `wfr clarify answer` |
+| Approve | COMMIT + push on `workflow/state` | Header + **full requirements.md** → label swap last | `wfr clarify approve` |
 
 ## Hard rules
 
+- `state.json`, `metrics.jsonl`, label swaps, and issue comments are written only via the `wfr` CLI (`wfr clarify {init,answer,approve}`, `wfr label swap`, `wfr issue comment`) — never hand-edit `state.json`, hand-append to `metrics.jsonl`, or call `gh issue comment`/`gh issue edit` directly.
 - Never write application source code.
 - Never create `workflow/issue-{n}` during clarify.
 - **Stay on `workflow/state`** — only write under `issues/{n}/`. Read product source / `PROJECT.md` / learnings from **`origin/{base_branch}`**, not the working tree.
 - **Ensure state branch at start** — before session comment and Q1.
 - **Q&A in session only** — never ask clarifying questions via `gh issue comment`; never wait for issue-thread answers.
-- **Issue comments:** varied, engaging — see handoff-format example bank. Never repeat the same comment verbatim across issues. Only at **start** (session link) and **approve** (requirements), plus failures.
+- **Issue comments:** varied, engaging — see handoff-format example bank, posted via `wfr issue comment` (or internally by `wfr clarify approve`). Never repeat the same comment verbatim across issues. Only at **start** (session link) and **approve** (requirements), plus failures.
 - **Commit handoff after every Q&A turn** and at approve — include a `clarify_turn` metrics line each answered/skipped question.
 - **Never put `state.json` or other machine handoff in issue comments** — publish **approved `requirements.md` only** at clarify approve.
-- If push fails, short issue comment and **stop**; do not swap to `workflow:implement`.
+- If a `wfr` command fails (e.g. push fails), post a short failure comment via `wfr issue comment` and **stop**; do not swap to `workflow:implement`.
 - **Label swap first** at start; **last** at approve.

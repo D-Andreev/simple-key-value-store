@@ -242,6 +242,8 @@ Append **once** when the **close** routine finishes findings grading (issue clos
 | **Close** routine | Issue **closed** with label `workflow:human-review` (GitHub event) | `llm` — follow workflow-close |
 | `/workflow-close` | Manual / re-run | `llm` |
 
+`wfr close complete --issue {n} --summary "..."` builds and appends this event (and writes the matching `findings-grade.json`) from the model-authored `close-dispositions.json` — see [workflow-close/SKILL.md](../workflow-close/SKILL.md). All the fields above except `dispositions[].disposition` (the LLM judgment) are mechanically derived, not hand-typed.
+
 Idempotent: skip if `findings-grade.json` already exists (unless explicit re-run).
 
 No GitHub Action — close is a cloud routine like clarify / implement / review.
@@ -249,6 +251,10 @@ No GitHub Action — close is a cloud routine like clarify / implement / review.
 ---
 
 ## Append recipe
+
+**Clarify:** `wfr clarify answer --issue {n} --q-index {i} --category {category} --recommendation-outcome {outcome} --question "{text}"` builds and validates the `clarify_turn` object (rejecting unknown `category`/`recommendation_outcome` values), appends it, and commits + pushes with the rest of the handoff update — see [workflow-clarify/SKILL.md](../workflow-clarify/SKILL.md).
+
+**Other phases** (review/close, no CLI yet) append by hand:
 
 ```bash
 # On workflow/state, after preparing the event object:

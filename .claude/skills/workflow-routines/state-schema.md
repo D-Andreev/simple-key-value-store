@@ -44,6 +44,8 @@ All paths below are on **`workflow/state`** under `issues/{n}/`.
 | `review-findings.json` | — | — | commit at complete (checklist) |
 | `findings-grade.json` | — | — | close routine |
 
+During **clarify**, `state.json` is written/updated exclusively via `wfr clarify {init,answer,approve}` — never hand-edited. Other phases still write it directly until they get their own CLI commands.
+
 ## Key `state.json` fields
 
 | Field | Set by |
@@ -83,15 +85,15 @@ Short, **varied**, engaging issue comments (Claude Code voice) — see handoff-f
 
 ## Implement policy
 
-Handoff start on state → create work branch → code on work branch → draft PR → handoff complete on state → short comment → **`workflow:review` label last**.
+Handoff start on state → create work branch → code on work branch → draft PR → handoff complete on state → short comment → **`workflow:review` label last**. `state.json` is written/updated exclusively via `wfr implement {start,complete}` — never hand-edited. See [workflow-implement/SKILL.md](../workflow-implement/SKILL.md).
 
 ## Review policy
 
-Handoff start on state → review work-branch diff + code reading only (**no tests/build**) → **one** PR comment (`gh pr comment`, verdict in text) → write `review-report.md` + **`review-findings.json`** (`review_head_sha`) → handoff complete on state → short issue comment → **`workflow:human-review` label last**.
+Handoff start on state (`wfr review start`) → review work-branch diff + code reading only (**no tests/build**) → write `review-report.md` + draft `review-findings.json` → `wfr review complete` (finds PR, finalizes findings, posts **one** PR comment with verdict, handoff complete on state, **`workflow:human-review` label last**) — see [workflow-review/SKILL.md](../workflow-review/SKILL.md). `state.json` is written/updated exclusively via `wfr review {start,complete}` — never hand-edited.
 
 ## Close policy (issue close)
 
-**Close routine** (GitHub trigger: issue **closed** + label `workflow:human-review`). Score `review-findings.json` against `{review_head_sha}...{pr_head_sha}` with LLM → `findings-grade.json` + `close_completed` → swap to **`workflow:done`**. Unrelated PR merges do not trigger this.
+**Close routine** (GitHub trigger: issue **closed** + label `workflow:human-review`). Model writes `close-dispositions.json` (LLM judgment per finding, from `review-findings.json`); `wfr close complete` resolves `{review_head_sha}...{pr_head_sha}` mechanically, finalizes `findings-grade.json` + `close_completed`, and swaps to **`workflow:done`** — see [workflow-close/SKILL.md](../workflow-close/SKILL.md). Unrelated PR merges do not trigger this. `state.json` is written/updated exclusively via `wfr close complete` — never hand-edited.
 
 ## Comprehension policy (optional, local)
 

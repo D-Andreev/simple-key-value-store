@@ -11,11 +11,18 @@ When a phase **advances**, **label swap is usually last** — after handoff comm
 **Clarify start order:** label swap → **ensure `workflow/state` + init handoff commit** → session comment → Q1 **in session**.
 
 ```bash
-# implement complete
-# 1. git commit + push on workflow/state — issues/{n}/ …
-# 2. gh pr create --draft … (head = workflow/issue-{n})
-# 3. gh issue comment … (varied human comment)
-# 4. gh issue edit … ← LAST
+# implement complete — comment needs the PR URL this step creates, so it's 3 separate calls
+# 1. wfr implement complete --issue {n} …  (pushes work branch, opens draft PR, commits + pushes state.json)
+# 2. wfr issue comment --issue {n} --body "…"  (varied human comment, links the PR)
+# 3. wfr label swap --issue {n} --from workflow:implement --to workflow:review  ← LAST
+
+# review complete — PR already exists (found, not created), so this is one atomic call
+# wfr review complete --issue {n} --verdict "…" --summary "…"
+#   → finds PR, finalizes handoff, posts the one PR comment, swaps label ← LAST — internally
+
+# close complete — merged PR already exists, so this is one atomic call too
+# wfr close complete --issue {n} --summary "…"
+#   → resolves merged PR SHA, finalizes findings-grade.json, posts the issue comment, swaps label ← LAST — internally
 ```
 
 Record `labels_updated` in `state.json` when committing; swap labels after all other writes.
@@ -24,13 +31,17 @@ Record `labels_updated` in `state.json` when committing; swap labels after all o
 
 ## Label swap
 
+`wfr label swap` is generic across phases — it reads the issue's current labels, rejects a `--from`/`--to` pair that doesn't match reality or isn't one of the five valid transitions, then runs the `gh issue edit` pair:
+
 ```bash
-gh issue edit 42 --remove-label "workflow:start" --add-label "workflow:clarify"
-gh issue edit 42 --remove-label "workflow:clarify" --add-label "workflow:implement"
-gh issue edit 42 --remove-label "workflow:implement" --add-label "workflow:review"
-gh issue edit 42 --remove-label "workflow:review" --add-label "workflow:human-review"
-gh issue edit 42 --remove-label "workflow:human-review" --add-label "workflow:done"
+wfr label swap --issue 42 --from workflow:start --to workflow:clarify
+wfr label swap --issue 42 --from workflow:clarify --to workflow:implement
+wfr label swap --issue 42 --from workflow:implement --to workflow:review
+wfr label swap --issue 42 --from workflow:review --to workflow:human-review
+wfr label swap --issue 42 --from workflow:human-review --to workflow:done
 ```
+
+All five transitions are backed by `wfr` today. `wfr clarify approve`, `wfr review complete`, and `wfr close complete` each call this internally for their own swap — you only run it standalone at clarify start (`workflow:start` → `workflow:clarify`) and implement complete (`workflow:implement` → `workflow:review`, separate from `wfr implement complete` since that step needs the PR URL first).
 
 ## Triggers
 
