@@ -4,8 +4,8 @@
   "issue_url": "https://github.com/D-Andreev/simple-key-value-store/issues/8",
   "mode": "feature",
   "task": "[Feature]: Create initial project structure for CLI for simple key value store",
-  "phase": "implement",
-  "status": "done",
+  "phase": "review",
+  "status": "ai_running",
   "workflow_label": "workflow:review",
   "base_branch": "main",
   "state_branch": "workflow/state",
@@ -18,7 +18,7 @@
   "pr_number": 9,
   "pr_url": "https://github.com/D-Andreev/simple-key-value-store/pull/9",
   "created_at": "2026-08-10T06:48:46.447Z",
-  "updated_at": "2026-08-10T07:04:24.325Z",
+  "updated_at": "2026-08-10T07:08:19.020Z",
   "last_session_url": null,
   "history": [
     {
@@ -52,6 +52,11 @@
       "phase": "implement",
       "event": "phase_completed",
       "at": "2026-08-10T07:04:24.325Z"
+    },
+    {
+      "phase": "review",
+      "event": "started",
+      "at": "2026-08-10T07:08:19.020Z"
     }
   ],
   "human_feedback": [],
