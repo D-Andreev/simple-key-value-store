@@ -17,6 +17,7 @@ Scaffold project skeleton.  Use golang, standart lib, cobra for CLI
 | 2 | Project layout and Go module path? | `cmd/kvs/main.go` (entrypoint) + `internal/cli/` (commands) + `internal/store/` (interface + in-memory impl); module `github.com/D-Andreev/simple-key-value-store`; binary name `kvs` | Same |
 | 3 | Testing/CI stack? | stdlib `testing` (unit tests for `Store` + CLI commands, table-driven) + subprocess e2e tests + `golangci-lint` + GH Actions running `go build`, `go vet`, `golangci-lint run`, `go test ./...` on push/PR to `main` | Same |
 | 4 | Keys/values: plain strings or arbitrary bytes? | String keys, string values | Same |
+| 5 | Missing-key behavior on `get`/`delete`, and `list` output format? | Non-zero exit + `key not found` message on missing key; `list` prints one `key=value` per line, sorted by key | Same |
 
 ## Acceptance criteria
 - [ ] CLI exposes subcommands `set <key> <value>`, `get <key>`, `delete <key>`, `list`, each performing the corresponding basic operation against an in-memory `Store` (no input validation or polished error messages yet — that's future work); string keys, string values
@@ -26,7 +27,8 @@ Scaffold project skeleton.  Use golang, standart lib, cobra for CLI
 - [ ] E2E tests build the binary and exercise it as a subprocess, asserting stdout/exit code per command
 - [ ] `golangci-lint` configured and passing
 - [ ] GitHub Actions workflow runs `go build`, `go vet`, `golangci-lint run`, `go test ./...` on push/PR to `main`
-- [ ] ...
+- [ ] `get`/`delete` on a missing key exit non-zero with a `key not found` message; success paths exit 0
+- [ ] `list` prints one `key=value` per line, sorted by key, for deterministic output
 
 ## Approved by human
 - [ ] Pending — say `approve requirements` in the session when ready
