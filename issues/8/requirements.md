@@ -18,6 +18,7 @@ Scaffold project skeleton.  Use golang, standart lib, cobra for CLI
 | 3 | Testing/CI stack? | stdlib `testing` (unit tests for `Store` + CLI commands, table-driven) + subprocess e2e tests + `golangci-lint` + GH Actions running `go build`, `go vet`, `golangci-lint run`, `go test ./...` on push/PR to `main` | Same |
 | 4 | Keys/values: plain strings or arbitrary bytes? | String keys, string values | Same |
 | 5 | Missing-key behavior on `get`/`delete`, and `list` output format? | Non-zero exit + `key not found` message on missing key; `list` prints one `key=value` per line, sorted by key | Same |
+| 6 | Go version target for `go.mod` / CI? | Latest stable Go available at implement time (no pinned minor version) | Same |
 
 ## Acceptance criteria
 - [ ] CLI exposes subcommands `set <key> <value>`, `get <key>`, `delete <key>`, `list`, each performing the corresponding basic operation against an in-memory `Store` (no input validation or polished error messages yet — that's future work); string keys, string values
@@ -29,6 +30,7 @@ Scaffold project skeleton.  Use golang, standart lib, cobra for CLI
 - [ ] GitHub Actions workflow runs `go build`, `go vet`, `golangci-lint run`, `go test ./...` on push/PR to `main`
 - [ ] `get`/`delete` on a missing key exit non-zero with a `key not found` message; success paths exit 0
 - [ ] `list` prints one `key=value` per line, sorted by key, for deterministic output
+- [ ] `go.mod` targets the latest stable Go available at implement time (no pinned minor version)
 
 ## Approved by human
 - [ ] Pending — say `approve requirements` in the session when ready
