@@ -2,7 +2,7 @@
 name: Feature request
 about: Propose a new feature or capability
 title: "[Feature]: "
-labels: enhancement
+labels: workflow:start
 assignees: ''
 ---
 
