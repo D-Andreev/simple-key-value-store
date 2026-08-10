@@ -5,7 +5,6 @@ description: >-
   and principles review on the work branch; handoff on workflow/state; posts
   one PR comment with verdict. Use when a routine fires on workflow:review or
   for issue $0.
-disable-model-invocation: true
 metadata:
   internal: true
 ---

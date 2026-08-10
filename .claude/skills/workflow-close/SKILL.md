@@ -6,7 +6,6 @@ description: >-
   writes findings-grade.json, appends close_completed to metrics.jsonl, and
   sets workflow:done. Use when the close routine fires on issue closed +
   workflow:human-review, or via /workflow-close.
-disable-model-invocation: true
 metadata:
   internal: true
 ---

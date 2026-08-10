@@ -5,7 +5,6 @@ description: >-
   seed gotchas.md, generate PROJECT.md, create GitHub workflow labels, and
   create the long-lived workflow/state branch. Use when setting up a new
   repo, when PROJECT.md is missing, or when the user runs /workflow-init.
-disable-model-invocation: true
 metadata:
   internal: true
 ---

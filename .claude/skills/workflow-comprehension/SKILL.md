@@ -6,7 +6,6 @@ description: >-
   Claude Code session — no routine, no GitHub label changes. Skip by merging
   the PR and closing the issue. Use when the user runs /workflow-comprehension
   or wants to verify understanding of an issue's changes before merge.
-disable-model-invocation: true
 metadata:
   internal: true
 ---

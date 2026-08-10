@@ -6,7 +6,6 @@ description: >-
   implements with TDD red-green cycles, commits handoff updates on
   workflow/state, and sets workflow:review. Use when a routine fires on
   workflow:implement or for issue $0.
-disable-model-invocation: true
 metadata:
   internal: true
 ---

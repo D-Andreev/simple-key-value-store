@@ -6,7 +6,6 @@ description: >-
   question at a time in the session (humans answer only in session), posts
   short status issue comments, and sets workflow:implement. Use when a
   routine fires on workflow:start or for issue $0.
-disable-model-invocation: true
 metadata:
   internal: true
 ---
