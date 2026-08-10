@@ -16,10 +16,11 @@ Scaffold project initial structure. Use best patterns.
 | 3 | What commands should the CLI expose, and how invoked (subcommands vs. REPL)? | Subcommands: `set`, `get`, `delete`, `list` | Subcommands: `set`, `get`, `delete`, `list` |
 | 4 | CLI parsing approach and project layout? | `cobra` + standard `cmd/`+`internal/` layout | `cobra` + standard `cmd/`+`internal/` layout |
 | 5 | Testing/CI stack: stdlib `testing` + subprocess e2e + `golangci-lint` + GH Actions (build/vet/lint/test on push+PR)? | Yes, all of it | Yes, all of it |
+| 6 | Are keys/values plain strings, or arbitrary bytes? | String keys, string values | String keys, string values |
 
 ## Acceptance criteria
 - [ ] CLI is implemented in Go and builds to a single static binary
-- [ ] Store logic sits behind a `Store` interface (`Get`/`Set`/`Delete`/`List`) with an in-memory implementation; no persistence in this issue
+- [ ] Store logic sits behind a `Store` interface (`Get(key string) (string, bool)`, `Set(key, value string)`, `Delete(key string)`, `List() map[string]string`) with an in-memory implementation; no persistence in this issue
 - [ ] CLI exposes subcommands `set <key> <value>`, `get <key>`, `delete <key>`, `list`; exit code 0 on success, non-zero with a clear message on failure (e.g. missing key)
 - [ ] Project uses `cobra` for command routing, laid out as `cmd/kvs/main.go` (entrypoint), `internal/cli/` (commands), `internal/store/` (Store interface + in-memory impl)
 - [ ] Unit tests (stdlib `testing`, table-driven) cover the `Store` implementation and CLI commands
