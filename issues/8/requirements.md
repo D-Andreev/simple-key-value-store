@@ -13,8 +13,11 @@ Scaffold project skeleton.  Use golang, standart lib, cobra for CLI
 ## Clarifications
 | # | Question | Answer | Recommended |
 |---|----------|--------|-------------|
+| 1 | Does "no business logic, just structure" mean the `set/get/delete/list` subcommands are pure stubs (print placeholder, no wiring), or should they be wired to a real in-memory `Store` for basic get/set/delete/list, just without validation/error-message polish? | (A) Wired to a real in-memory `Store` — basic get/set/delete/list, no validation or polished error handling yet | (A) Wired to a real in-memory `Store` |
 
 ## Acceptance criteria
+- [ ] CLI exposes subcommands `set <key> <value>`, `get <key>`, `delete <key>`, `list`, each performing the corresponding basic operation against an in-memory `Store` (no input validation or polished error messages yet — that's future work)
+- [ ] Store logic sits behind a `Store` interface with an in-memory implementation
 - [ ] ...
 
 ## Approved by human
