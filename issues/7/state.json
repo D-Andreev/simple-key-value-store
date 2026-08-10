@@ -1,0 +1,53 @@
+{
+  "id": "issue-7",
+  "issue_number": 7,
+  "issue_url": "https://github.com/D-Andreev/simple-key-value-store/issues/7",
+  "mode": "feature",
+  "task": "[Feature]: Create initial structure for CLI simple key value store",
+  "phase": "clarify",
+  "status": "ai_running",
+  "workflow_label": "workflow:clarify",
+  "base_branch": "main",
+  "state_branch": "workflow/state",
+  "work_branch": null,
+  "handoff_path": "issues/7",
+  "requirements_approved": false,
+  "clarify_rounds": 0,
+  "review_verdict": null,
+  "review_head_sha": null,
+  "pr_number": null,
+  "pr_url": null,
+  "created_at": "2026-08-10T06:45:31.215Z",
+  "updated_at": "2026-08-10T06:45:31.215Z",
+  "last_session_url": null,
+  "history": [
+    {
+      "phase": "clarify",
+      "event": "handoff_initialized",
+      "at": "2026-08-10T06:45:31.215Z",
+      "note": "state_branch=workflow/state path=issues/7"
+    },
+    {
+      "phase": "clarify",
+      "event": "started",
+      "at": "2026-08-10T06:45:31.215Z",
+      "note": "base_branch=main"
+    }
+  ],
+  "human_feedback": [],
+  "comprehension_attempt": 0,
+  "comprehension_passed": false,
+  "comprehension_skipped": false,
+  "artifacts": {
+    "task": "task.md",
+    "language": "language.md",
+    "requirements": "requirements.md",
+    "adrs": "adrs.md",
+    "implement_handoff": "implement-handoff.md",
+    "review_report": "review-report.md",
+    "review_findings": "review-findings.json",
+    "findings_grade": "findings-grade.json",
+    "comprehension_test": "comprehension-test.md",
+    "retro": "retro.md"
+  }
+}
