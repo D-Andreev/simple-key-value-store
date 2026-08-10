@@ -1,0 +1,4 @@
+{"findings": [
+  {"severity": "critical", "summary": "golangci-lint config uses v2 schema but the CI action's `latest` install resolves to golangci-lint v1.64.8, which rejects it — the build-lint-test check run on PR #9 fails at the lint step before tests ever run, violating the 'builds, tests and lints in CI' and 'golangci-lint passing' acceptance criteria", "paths": [".golangci.yml", ".github/workflows/ci.yml"]},
+  {"severity": "minor", "summary": "get/delete commands silently swallow any non-ErrKeyNotFound error with no stderr output (SilenceErrors is set); not reachable today but worth a generic fallback message once real I/O-backed stores can fail differently", "paths": ["internal/cli/get.go", "internal/cli/delete.go"]}
+]}
