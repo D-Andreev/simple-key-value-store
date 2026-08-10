@@ -75,9 +75,10 @@ Same as A/B.
 
 ## Start sequence (mode A)
 
-0. **Ensure the `wfr` CLI is installed** — it owns every handoff write below (state.json, metrics.jsonl, label swaps, requirements finalize) so nothing is hand-typed:
+0. **Ensure the `wfr` CLI is installed** — it owns every handoff write below (state.json, metrics.jsonl, label swaps, requirements finalize) so nothing is hand-typed. `gh` isn't always preinstalled in the sandbox either — ensure both:
    ```bash
    command -v wfr >/dev/null 2>&1 || curl -fsSL https://raw.githubusercontent.com/D-Andreev/ai-workflow-routines/main/scripts/install.sh | sh
+   command -v gh >/dev/null 2>&1 || (apt-get update -qq && apt-get install -y gh)
    ```
 1. **Swap labels first**:
    ```bash
@@ -91,7 +92,7 @@ Same as A/B.
    wfr clarify init --issue {n} --issue-url {issue_url} --title "{title}" --base-branch {base_branch} --body "{issue body}"
    ```
    One call: ensures/creates `workflow/state`, writes `state.json` per [fixture](../workflow-routines/fixtures/state-example-clarify-start.json), writes the initial `task.md`/`language.md`/`requirements.md` shells under `issues/{n}/`, creates an empty `metrics.jsonl`, and commits + pushes.
-5. **Post session comment** — pick a **fresh phrasing** from handoff-format example bank (or invent one). **Must link** session + **state tree** (`…/tree/workflow/state/issues/{n}`). Reference the issue topic when natural:
+5. **Post session comment** — pick a **fresh phrasing** from handoff-format example bank (or invent one). **Must include actual markdown links** (`[text](url)`, not prose mentions) to the session + **state tree** (`…/tree/workflow/state/issues/{n}`). Reference the issue topic when natural:
    ```bash
    wfr issue comment --issue {n} --body "{session comment text}"
    ```

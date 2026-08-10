@@ -36,9 +36,10 @@ State in the review-report header: **"Fresh-eyes: artifacts and diff only."**
 
 ## Sequence (autonomous — complete in one run)
 
-0. **Ensure the `wfr` CLI is installed**:
+0. **Ensure the `wfr` and `gh` CLIs are installed** — `gh` isn't always preinstalled in the sandbox:
    ```bash
    command -v wfr >/dev/null 2>&1 || curl -fsSL https://raw.githubusercontent.com/D-Andreev/ai-workflow-routines/main/scripts/install.sh | sh
+   command -v gh >/dev/null 2>&1 || (apt-get update -qq && apt-get install -y gh)
    ```
 1. **Read issue**; checkout **`workflow/state`**; pull latest; read `issues/{n}/` handoff files.
 2. Checkout **`work_branch`** (`workflow/issue-{n}`); pull latest for diff/code.

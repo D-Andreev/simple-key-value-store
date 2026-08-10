@@ -30,9 +30,10 @@ If preconditions fail, **stop**.
 
 ## Sequence (autonomous — complete in one run)
 
-0. **Ensure the `wfr` CLI is installed**:
+0. **Ensure the `wfr` and `gh` CLIs are installed** — `gh` isn't always preinstalled in the sandbox:
    ```bash
    command -v wfr >/dev/null 2>&1 || curl -fsSL https://raw.githubusercontent.com/D-Andreev/ai-workflow-routines/main/scripts/install.sh | sh
+   command -v gh >/dev/null 2>&1 || (apt-get update -qq && apt-get install -y gh)
    ```
 1. **Resolve issue `n`** from the GitHub issue-closed trigger (or manual invoke). Checkout **`workflow/state`**; pull latest; read `issues/{n}/review-findings.json` and `state.json`.
 2. **Grade each finding** (LLM judgment) against the post-review diff. You don't fetch the diff yourself — read the finding `summary`, then reason about whether it was addressed; `wfr close complete` (below) computes the actual diff and path-touch data mechanically. Write `issues/{n}/close-dispositions.json` with **only** the judgment call per finding — no ids to invent, just match against what's already in `review-findings.json`:

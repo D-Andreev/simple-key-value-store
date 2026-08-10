@@ -26,13 +26,14 @@ If preconditions fail, post short issue comment via `wfr issue comment`. **Do no
 
 ## Start sequence
 
-0. **Ensure the `wfr` CLI is installed**:
+0. **Ensure the `wfr` and `gh` CLIs are installed** — `gh` isn't always preinstalled in the sandbox:
    ```bash
    command -v wfr >/dev/null 2>&1 || curl -fsSL https://raw.githubusercontent.com/D-Andreev/ai-workflow-routines/main/scripts/install.sh | sh
+   command -v gh >/dev/null 2>&1 || (apt-get update -qq && apt-get install -y gh)
    ```
 1. Read issue.
 2. Verify `workflow/PROJECT.md` on `base_branch` (read via fetch/checkout of base or work branch after create).
-3. Post session comment — **vary phrasing** (handoff-format implement example bank). Must link session; work-branch link after create:
+3. Post session comment — **vary phrasing** (handoff-format implement example bank). Must include an actual markdown link to the session (`[text]({session_url})`, not just prose mentioning it); work-branch link after create:
    ```bash
    wfr issue comment --issue {n} --body "{session comment text}"
    ```

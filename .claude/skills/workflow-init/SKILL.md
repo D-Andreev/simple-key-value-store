@@ -21,6 +21,7 @@ Ensure the `wfr` CLI is installed, then run it — it owns the whole process bel
 
 ```bash
 command -v wfr >/dev/null 2>&1 || curl -fsSL https://raw.githubusercontent.com/D-Andreev/ai-workflow-routines/main/scripts/install.sh | sh
+command -v gh >/dev/null 2>&1 || (apt-get update -qq && apt-get install -y gh)
 wfr init
 ```
 
@@ -38,6 +39,7 @@ To check whether a repo is already initialized, without changing anything:
 
 ```bash
 command -v wfr >/dev/null 2>&1 || curl -fsSL https://raw.githubusercontent.com/D-Andreev/ai-workflow-routines/main/scripts/install.sh | sh
+command -v gh >/dev/null 2>&1 || (apt-get update -qq && apt-get install -y gh)
 wfr verify
 ```
 
