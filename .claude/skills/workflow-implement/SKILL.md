@@ -59,7 +59,7 @@ TDD red-green per PROJECT.md; push **work branch**. Never commit `issues/` hando
 
 ## implement-handoff.md
 
-Written by the model to `issues/{n}/implement-handoff.md` on **`workflow/state`** right before calling `wfr implement complete` (switch there per [handoff-format.md](../workflow-routines/handoff-format.md#switching-between-state-and-work-branches) if you're still on the work branch). Use the structure in [internal/handoff/templates/implement-handoff.md.tmpl](../../internal/handoff/templates/implement-handoff.md.tmpl) — `## Summary`, `## Branch`, `## Changes`, `## TDD cycles`, `## Test results`, `## Acceptance criteria`, `## Suggested review scenarios` — `wfr implement complete` validates every section is present and actually filled in (not left as `...`) before it will proceed.
+Written by the model to `issues/{n}/implement-handoff.md` on **`workflow/state`** right before calling `wfr implement complete` (switch there per [handoff-format.md](../workflow-routines/handoff-format.md#switching-between-state-and-work-branches) if you're still on the work branch). Seven required sections, each with real content (not left as `...`): `## Summary`, `## Branch`, `## Changes`, `## TDD cycles`, `## Test results`, `## Acceptance criteria`, `## Suggested review scenarios`. `wfr implement complete` validates all seven are present and filled in before it will proceed.
 
 ## Complete sequence
 

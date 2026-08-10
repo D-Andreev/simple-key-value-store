@@ -41,6 +41,7 @@ git ls-tree -r --name-only origin/{base_branch} | head
 | `workflow/PROJECT.md` | `git show origin/{base_branch}:workflow/PROJECT.md` |
 | `workflow/learnings/gotchas.md` | Same pattern from `base_branch` |
 | Application code | Read-only from `origin/{base_branch}:…` — never from the state-branch working tree |
+| Skill docs/fixtures (e.g. this repo's `.claude/skills/...`) | Same pattern — the markdown links in these docs are relative paths that only resolve when browsing the repo (or checked out on `base_branch`), not from the `workflow/state` working tree, which has none of this. Use `git show origin/{base_branch}:.claude/skills/workflow-routines/fixtures/state-example-clarify-start.json` etc. |
 
 After handoff exists, **only write** under `issues/{n}/` on **`workflow/state`** during clarify.
 
@@ -139,7 +140,7 @@ wfr clarify approve --issue {n} --header "{varied, engaging header — see hando
 
 ## requirements.md template
 
-`wfr clarify init` generates this from [internal/handoff/templates/requirements.md.tmpl](../../internal/handoff/templates/requirements.md.tmpl) — see that file for the exact shape (`## Original ask`, `## Clarifications` table, `## Acceptance criteria`, `## Approved by human`). Don't hand-author it; edit the generated file's `## Clarifications` rows and `## Acceptance criteria` items as answers come in.
+`wfr clarify init` generates `issues/{n}/requirements.md` for you — don't hand-author it, read the generated file and edit its `## Clarifications` rows and `## Acceptance criteria` items as answers come in. It has four sections: `## Original ask`, `## Clarifications` (table), `## Acceptance criteria`, `## Approved by human`. `wfr clarify approve` validates all four are present and filled in before it will proceed.
 
 ## GitHub writes (clarify)
 
