@@ -55,11 +55,13 @@ Related: internal/store/store.go defines the Store interface this would implemen
 | # | Question | Answer | Recommended |
 |---|----------|--------|-------------|
 | 1 | `kvs` is a one-shot CLI (each invocation is a fresh process that exits after one command), not a daemon. Should `FileStore` flush synchronously to disk on every `Set`/`Delete`, before the command returns, rather than periodic/batched flush? | Yes — synchronous flush on every mutating call. No batching/async flush; the "periodic/batched flush — TBD" option in the original ask is dropped since there's no live process to defer a flush to. | Yes |
+| 2 | `main.go` currently constructs the store *before* `cli.NewRootCmd(s)`, but Cobra only parses flags during `root.Execute()`, so `NewRootCmd` can't know `--data-dir` at store-construction time. How should `--data-dir` be threaded through to select `MemoryStore` vs. `FileStore`? | Manual pre-scan of `os.Args` for `--data-dir` in `main.go` *before* building the store and calling `NewRootCmd`, keeping `--data-dir` also registered as a persistent flag on root for `--help`/usage text only (not as the source of truth for store selection). No restructuring of `newSetCmd`/`newGetCmd`/etc. to take a lazily-resolved store. | Manual pre-scan + persistent flag for docs only |
 
 ## Acceptance criteria
 - [ ] Data set via `kvs set` is retrievable via `kvs get` after the process restarts, when `--data-dir` is provided
 - [ ] Without `--data-dir`, behavior is unchanged (in-memory only, matches current README)
 - [ ] `FileStore.Set`/`FileStore.Delete` write the full JSON snapshot to disk synchronously, before returning — no batched/periodic flush
+- [ ] `main.go` pre-scans `os.Args` for `--data-dir` to select `MemoryStore` vs. `FileStore` before calling `cli.NewRootCmd`; `--data-dir` is also registered as a persistent flag on root so `kvs --help` documents it
 - [ ] `go test ./...` passes, including new `FileStore` tests
 
 ## Approved by human
