@@ -44,12 +44,14 @@ _(none)_
 | 2 | Issue proposes `[]byte` values (`Set(key, value []byte) error`, `Get(key) ([]byte, error)`), but the existing `Store` interface uses `string` throughout (store, CLI, tests). Switch to `[]byte`, or keep `string`? | Keep `string` — no type change. | Keep `string` (no stated need for binary values; `[]byte` would ripple into CLI print/parse logic and break every existing call site for no benefit; scope as a separate follow-up if binary support is actually wanted). |
 | 3 | Issue lists `Exists(key) (bool, error)` as an optional convenience. Add it in this issue, or defer? | Defer — not adding `Exists` in this issue. | Defer (marked optional in the issue; no acceptance criterion requires it; `Get` + `ErrKeyNotFound` already covers presence checks; keeps this issue focused). |
 | 4 | Given the above answers, every acceptance criterion is already satisfied by code on `main` (`Set`/`Get`/`Delete`/`List`, concurrency-safe, fully tested). Is there remaining implementation work, or is this issue already-satisfied — implement just re-verifies the existing suite is green, no new code? | Agreed — treat as already-satisfied; implement re-verifies existing tests, ships no new store/CLI code (unless a genuine gap turns up on closer inspection). | Treat as already-satisfied: re-run existing tests to confirm green, ship no new code, optionally add 1-2 tests only if a real gap is found on closer inspection. |
+| 5 | Should implement add an explicit concurrent-access test (parallel goroutines on `Set`/`Get`/`Delete` under `go test -race`) to demonstrate the "concurrency-safe" AC? CI currently runs plain `go test ./...` (no `-race`) and no concurrency test exists today. | Yes — add a race-detector test. | Yes, add one small concurrent-access test if CI doesn't already run `-race` and none exists (it doesn't/none does) — cheap, and it's the one AC not otherwise exercised by current tests. |
 
 ## Acceptance criteria
 - [ ] Deleting a key removes it (subsequent `Get` returns `ErrKeyNotFound`); deleting a missing key also returns `ErrKeyNotFound` (unchanged from current behavior) — not a breaking change
 - [ ] `Set`/`Get` keep `string` keys and values — no signature change to `[]byte`
 - [ ] No `Exists` method added — deferred out of this issue
 - [ ] Implement phase re-runs the existing store/CLI test suite and confirms it passes; no new store or CLI code is written unless a genuine gap is found on closer inspection (in which case it's a small, targeted addition — not a rewrite)
+- [ ] Add a concurrent-access test for `MemoryStore` (parallel goroutines calling `Set`/`Get`/`Delete`), runnable under `go test -race`, to demonstrate the concurrency-safety AC
 
 ## Approved by human
 - [ ] Pending — say `approve requirements` in the session when ready
