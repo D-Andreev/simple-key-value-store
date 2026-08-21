@@ -41,9 +41,11 @@ _(none)_
 | # | Question | Answer | Recommended |
 |---|----------|--------|-------------|
 | 1 | Should `Delete` on a missing key become idempotent (return `nil`) per the issue's literal wording, or keep the existing `ErrKeyNotFound` behavior the CLI already relies on for its "key not found" message? | Keep `Delete` erroring with `ErrKeyNotFound` on a missing key — no behavior change. | Keep `Delete` erroring with `ErrKeyNotFound` on a missing key (preserves existing CLI UX and test suite; "idempotent" read as end-state, not "always returns nil"). |
+| 2 | Issue proposes `[]byte` values (`Set(key, value []byte) error`, `Get(key) ([]byte, error)`), but the existing `Store` interface uses `string` throughout (store, CLI, tests). Switch to `[]byte`, or keep `string`? | Keep `string` — no type change. | Keep `string` (no stated need for binary values; `[]byte` would ripple into CLI print/parse logic and break every existing call site for no benefit; scope as a separate follow-up if binary support is actually wanted). |
 
 ## Acceptance criteria
 - [ ] Deleting a key removes it (subsequent `Get` returns `ErrKeyNotFound`); deleting a missing key also returns `ErrKeyNotFound` (unchanged from current behavior) — not a breaking change
+- [ ] `Set`/`Get` keep `string` keys and values — no signature change to `[]byte`
 
 ## Approved by human
 - [ ] Pending — say `approve requirements` in the session when ready
