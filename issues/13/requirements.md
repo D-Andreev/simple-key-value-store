@@ -57,6 +57,7 @@ Related: internal/store/store.go defines the Store interface this would implemen
 | 1 | `kvs` is a one-shot CLI (each invocation is a fresh process that exits after one command), not a daemon. Should `FileStore` flush synchronously to disk on every `Set`/`Delete`, before the command returns, rather than periodic/batched flush? | Yes — synchronous flush on every mutating call. No batching/async flush; the "periodic/batched flush — TBD" option in the original ask is dropped since there's no live process to defer a flush to. | Yes |
 | 2 | `main.go` currently constructs the store *before* `cli.NewRootCmd(s)`, but Cobra only parses flags during `root.Execute()`, so `NewRootCmd` can't know `--data-dir` at store-construction time. How should `--data-dir` be threaded through to select `MemoryStore` vs. `FileStore`? | Manual pre-scan of `os.Args` for `--data-dir` in `main.go` *before* building the store and calling `NewRootCmd`, keeping `--data-dir` also registered as a persistent flag on root for `--help`/usage text only (not as the source of truth for store selection). No restructuring of `newSetCmd`/`newGetCmd`/etc. to take a lazily-resolved store. | Manual pre-scan + persistent flag for docs only |
 | 3 | If `--data-dir` doesn't exist yet, should `FileStore` auto-create it (and `store.json`)? And if `store.json` exists but has corrupt/invalid JSON, should `kvs` fail loudly (stderr + non-zero exit, matching the existing `"key not found"` convention) or silently fall back to an empty store? | Auto-create the directory on startup. Fail loudly on corrupt JSON — no silent data-loss fallback. | Auto-create dir; fail loudly on corrupt JSON |
+| 4 | If `--data-dir` points to a path that already exists but is a regular file, not a directory, how should `kvs` behave? | Fail loudly with a clear error, same "fail loudly" principle as corrupt JSON (Q3) — don't attempt to create `store.json` inside a non-directory path or fail with a confusing underlying OS error. | Fail loudly with a clear error |
 
 ## Acceptance criteria
 - [ ] Data set via `kvs set` is retrievable via `kvs get` after the process restarts, when `--data-dir` is provided
@@ -65,6 +66,7 @@ Related: internal/store/store.go defines the Store interface this would implemen
 - [ ] `main.go` pre-scans `os.Args` for `--data-dir` to select `MemoryStore` vs. `FileStore` before calling `cli.NewRootCmd`; `--data-dir` is also registered as a persistent flag on root so `kvs --help` documents it
 - [ ] `FileStore` auto-creates `--data-dir` (and `store.json`) on startup if missing
 - [ ] `FileStore` fails loudly (non-zero exit, clear stderr message) if `store.json` exists but contains invalid JSON — no silent fallback to an empty store
+- [ ] `kvs` fails loudly with a clear error if `--data-dir` points to an existing regular file rather than a directory
 - [ ] Unit tests for `FileStore` mirroring `store_test.go` coverage for `MemoryStore` (set/get, missing-key get/delete, list, overwrite)
 - [ ] e2e test covering `set` → restart process → `get` (new `kvs` process, same `--data-dir`, sees the persisted value)
 - [ ] `go test ./...` passes, including new `FileStore` tests
