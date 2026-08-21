@@ -4,9 +4,9 @@
   "issue_url": "https://github.com/D-Andreev/simple-key-value-store/issues/11",
   "mode": "feature",
   "task": "[Feature]: Implement CRUD operations for key value store",
-  "phase": "review",
+  "phase": "close",
   "status": "done",
-  "workflow_label": "workflow:human-review",
+  "workflow_label": "workflow:done",
   "base_branch": "main",
   "state_branch": "workflow/state",
   "work_branch": "workflow/issue-11",
@@ -18,7 +18,7 @@
   "pr_number": 12,
   "pr_url": "https://github.com/D-Andreev/simple-key-value-store/pull/12",
   "created_at": "2026-08-21T07:58:08.122Z",
-  "updated_at": "2026-08-21T08:09:40.466Z",
+  "updated_at": "2026-08-21T09:39:34.517Z",
   "last_session_url": null,
   "history": [
     {
@@ -72,6 +72,16 @@
       "phase": "review",
       "event": "pr_comment_posted",
       "at": "2026-08-21T08:09:40.466Z"
+    },
+    {
+      "phase": "close",
+      "event": "findings_graded",
+      "at": "2026-08-21T09:39:34.517Z"
+    },
+    {
+      "phase": "close",
+      "event": "phase_completed",
+      "at": "2026-08-21T09:39:34.517Z"
     }
   ],
   "human_feedback": [],
