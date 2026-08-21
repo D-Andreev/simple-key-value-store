@@ -75,11 +75,11 @@ Same as A/B.
 
 ## Start sequence (mode A)
 
-0. **Ensure the `wfr` CLI is installed** — it owns every handoff write below (state.json, metrics.jsonl, label swaps, requirements finalize) so nothing is hand-typed. `gh` isn't always preinstalled in the sandbox either — ensure both:
+0. **Ensure the `wfr` CLI is installed** — it owns every handoff write below (state.json, metrics.jsonl, label swaps, requirements finalize) so nothing is hand-typed:
    ```bash
    command -v wfr >/dev/null 2>&1 || curl -fsSL https://raw.githubusercontent.com/D-Andreev/ai-workflow-routines/main/scripts/install.sh | sh
-   command -v gh >/dev/null 2>&1 || (apt-get update -qq && apt-get install -y gh)
    ```
+   `wfr` installs `gh` itself on first use if it's missing from the sandbox — no separate `gh` install step needed.
 1. **Swap labels first**:
    ```bash
    wfr label swap --issue {n} --from workflow:start --to workflow:clarify

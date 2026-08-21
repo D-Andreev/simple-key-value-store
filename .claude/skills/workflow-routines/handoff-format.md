@@ -284,7 +284,7 @@ Verifies implement ran (`work_branch` set), updates `state.json` (`phase: review
 wfr review complete --issue {n} --verdict "{verdict}" --summary "{text}" --notes "{text}"
 ```
 
-Finds the PR, validates `review-report.md`, captures `review_head_sha` from the work branch's remote tip, finalizes `review-findings.json` (ids, `required`, `pr_number`, `review_head_sha`, `created_at`), appends `review_completed` to `metrics.jsonl`, updates `state.json` (`review_head_sha`, `review_verdict`, `pr_number`), commits + pushes, posts the **one** PR comment, and **swaps labels last**. Fails closed at every step.
+Reads `pr_number`/`pr_url` already recorded in `state.json` (set by implement — no live GitHub lookup), validates `review-report.md`, captures `review_head_sha` from the work branch's remote tip, finalizes `review-findings.json` (ids, `required`, `pr_number`, `review_head_sha`, `created_at`), appends `review_completed` to `metrics.jsonl`, updates `state.json` (`review_head_sha`, `review_verdict`, `pr_number`), commits + pushes, posts the **one** full-detail comment on the **PR**, and **swaps labels last**. Fails closed at every step. Prints the PR URL — follow up with a short `wfr issue comment` (verdict + PR link, "Complete — example bank" above) on the issue.
 
 ### Close (issue close — close routine)
 

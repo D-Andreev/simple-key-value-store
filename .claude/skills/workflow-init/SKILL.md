@@ -21,11 +21,10 @@ Ensure the `wfr` CLI is installed, then run it — it owns the whole process bel
 
 ```bash
 command -v wfr >/dev/null 2>&1 || curl -fsSL https://raw.githubusercontent.com/D-Andreev/ai-workflow-routines/main/scripts/install.sh | sh
-command -v gh >/dev/null 2>&1 || (apt-get update -qq && apt-get install -y gh)
 wfr init
 ```
 
-If GitHub isn't usable (`gh` missing or not authenticated), it aborts immediately with an error before touching anything — no partial local writes. Otherwise it, in order:
+`wfr init` installs `gh` itself on first use if it's missing from the sandbox. If GitHub still isn't usable afterward (install failed or not authenticated), it aborts immediately with an error before touching anything — no partial local writes. Otherwise it, in order:
 
 1. Scaffolds `workflow/learnings/` and seeds `workflow/learnings/gotchas.md` if missing
 2. Generates `workflow/PROJECT.md` if missing — never overwrites an existing one
@@ -39,7 +38,6 @@ To check whether a repo is already initialized, without changing anything:
 
 ```bash
 command -v wfr >/dev/null 2>&1 || curl -fsSL https://raw.githubusercontent.com/D-Andreev/ai-workflow-routines/main/scripts/install.sh | sh
-command -v gh >/dev/null 2>&1 || (apt-get update -qq && apt-get install -y gh)
 wfr verify
 ```
 

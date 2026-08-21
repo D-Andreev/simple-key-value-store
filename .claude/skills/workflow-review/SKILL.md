@@ -36,11 +36,11 @@ State in the review-report header: **"Fresh-eyes: artifacts and diff only."**
 
 ## Sequence (autonomous — complete in one run)
 
-0. **Ensure the `wfr` and `gh` CLIs are installed** — `gh` isn't always preinstalled in the sandbox:
+0. **Ensure the `wfr` CLI is installed**:
    ```bash
    command -v wfr >/dev/null 2>&1 || curl -fsSL https://raw.githubusercontent.com/D-Andreev/ai-workflow-routines/main/scripts/install.sh | sh
-   command -v gh >/dev/null 2>&1 || (apt-get update -qq && apt-get install -y gh)
    ```
+   `wfr` installs `gh` itself on first use if it's missing from the sandbox — no separate `gh` install step needed.
 1. **Read issue**; checkout **`workflow/state`**; pull latest; read `issues/{n}/` handoff files.
 2. Checkout **`work_branch`** (`workflow/issue-{n}`); pull latest for diff/code.
 3. **Post session comment** — vary phrasing (handoff-format review start bank). Link session + PR:
@@ -59,8 +59,12 @@ State in the review-report header: **"Fresh-eyes: artifacts and diff only."**
    ```bash
    wfr review complete --issue {n} --verdict "{verdict}" --summary "{one short paragraph}" --notes "{optional bullet list}"
    ```
-   Finds the PR (`gh pr list --head workflow/issue-{n}`), validates `review-report.md` (structural + that its `## Verdict` section matches `--verdict` exactly), captures `review_head_sha` from the work branch's remote tip, finalizes `review-findings.json` (assigns `F1`…`Fn` ids, derives `required` from severity, injects `review_head_sha`/`pr_number`/`schema_version`/`created_at`), computes `critical_count`/`minor_count`/`notes_count` from the findings and appends `review_completed` to `metrics.jsonl`, updates `state.json` (`review_verdict`, `review_head_sha`, `pr_number`/`pr_url`, `status: done`, history), commits + pushes, posts the **one** PR comment (`gh pr comment` — never `gh pr review`), and **swaps labels last** (`workflow:human-review`). Fails closed — if validation or the commit fails, no comment and no label swap; if the comment fails, no label swap.
-9. **Stop.**
+   Reads `pr_number`/`pr_url` already recorded in `state.json` (set when implement opened the PR — nothing is looked up live on GitHub), validates `review-report.md` (structural + that its `## Verdict` section matches `--verdict` exactly), captures `review_head_sha` from the work branch's remote tip, finalizes `review-findings.json` (assigns `F1`…`Fn` ids, derives `required` from severity, injects `review_head_sha`/`pr_number`/`schema_version`/`created_at`), computes `critical_count`/`minor_count`/`notes_count` from the findings and appends `review_completed` to `metrics.jsonl`, updates `state.json` (`review_verdict`, `review_head_sha`, `pr_number`/`pr_url`, `status: done`, history), commits + pushes, posts the **one full-detail** comment on the **PR** (`gh pr comment` — never `gh pr review`), and **swaps labels last** (`workflow:human-review`). Fails closed — if validation or the commit fails, no comment and no label swap; if the comment fails, no label swap. Prints the PR URL.
+9. **Post short completion comment on the issue** — a one-liner (verdict + markdown link to the PR from step 8), not the full report:
+   ```bash
+   wfr issue comment --issue {n} --body "{short text with PR link}"
+   ```
+10. **Stop.**
 
 Closeout (did humans address findings?) is **not** part of this phase — the **close routine** runs when the issue is **closed** with `workflow:human-review`.
 
@@ -115,6 +119,16 @@ Full report: `issues/{n}/review-report.md` on `workflow/state`.
 ```
 
 **Vary the wording** in `--summary`/`--notes` — use the review example bank or write fresh copy. `wfr review complete` records `pr_comment_posted` in handoff history automatically. **Do not** post a second comment explaining review API failures.
+
+## Issue completion comment (short, separate from the PR comment)
+
+After `wfr review complete` returns (it prints the PR URL), post a **short** completion comment on the **issue** — verdict plus a markdown link to the PR, not the full report:
+
+```markdown
+AI review done — **{--verdict}**. See [the PR]({pr_url}) for the full report.
+```
+
+Vary the wording; don't reuse boilerplate across issues. The detailed report lives on the PR (previous section) and on `workflow/state`'s `review-report.md` — never duplicate it into the issue comment.
 
 ## review-report.md template
 
@@ -215,6 +229,7 @@ Empty `findings: []` when verdict is clean `APPROVE` — still write the file (`
 - Reference specific files and lines in findings.
 - **Always write `review-findings.json`** before calling `wfr review complete` (even `{"findings": []}` — it errors if the file doesn't exist).
 - **PR comment must be short** — details on `workflow/state` in `review-report.md`.
+- **Full review detail (verdict, summary, notes) goes on the PR only.** The issue gets a short completion comment (verdict + PR link) posted separately via `wfr issue comment` after `wfr review complete` returns — never the other way around.
 - **Commit handoff at start and complete** on `workflow/state` — `wfr review complete` appends `review_completed` to `metrics.jsonl` itself (never rewrites prior lines).
 - If a `wfr` command fails (e.g. push fails), post a short issue comment via `wfr issue comment` and **stop**; do not advance labels.
 - **Never put artifacts in issue comments.**

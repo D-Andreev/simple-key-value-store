@@ -26,11 +26,11 @@ If preconditions fail, post short issue comment via `wfr issue comment`. **Do no
 
 ## Start sequence
 
-0. **Ensure the `wfr` and `gh` CLIs are installed** — `gh` isn't always preinstalled in the sandbox:
+0. **Ensure the `wfr` CLI is installed**:
    ```bash
    command -v wfr >/dev/null 2>&1 || curl -fsSL https://raw.githubusercontent.com/D-Andreev/ai-workflow-routines/main/scripts/install.sh | sh
-   command -v gh >/dev/null 2>&1 || (apt-get update -qq && apt-get install -y gh)
    ```
+   `wfr` installs `gh` itself on first use if it's missing from the sandbox — no separate `gh` install step needed.
 1. Read issue.
 2. Verify `workflow/PROJECT.md` on `base_branch` (read via fetch/checkout of base or work branch after create).
 3. Post session comment — **vary phrasing** (handoff-format implement example bank). Must include an actual markdown link to the session (`[text]({session_url})`, not just prose mentioning it); work-branch link after create:
@@ -43,7 +43,8 @@ If preconditions fail, post short issue comment via `wfr issue comment`. **Do no
    ```
 5. Merge language → PROJECT.md on **work branch**; commit ADRs if present.
 6. Feature or bugfix process on **work branch**.
-7. Complete sequence.
+7. Run the project's automated checks (tests, lint, build — whatever the repo normally runs) on **work branch**. Fix failures and re-run until clean. **Do not move on to Complete with known-failing checks.**
+8. Complete sequence.
 
 ## Prepare repo
 
@@ -56,6 +57,10 @@ If preconditions fail, post short issue comment via `wfr issue comment`. **Do no
 ## Feature / bugfix process
 
 TDD red-green per PROJECT.md; push **work branch**. Never commit `issues/` handoff files onto the work branch.
+
+## Running checks before completing
+
+Before switching to `workflow/state` to write the handoff, actually run the repo's automated checks on the work branch — whatever it normally uses (test runner, linter, build/typecheck) — and fix real failures until they're clean. This is on you, the model: `wfr` does not run or enforce checks itself. `## Test results` in `implement-handoff.md` must report the real output of that run (counts, failures fixed, or why something was skipped) — never an assumed or invented pass.
 
 ## implement-handoff.md
 
@@ -95,3 +100,4 @@ Written by the model to `issues/{n}/implement-handoff.md` on **`workflow/state`*
 - **Never put artifacts in issue comments** — post via `wfr issue comment`, short status only.
 - If a `wfr` command fails (e.g. push fails), post a short failure comment via `wfr issue comment` and **stop**; do not advance labels.
 - **Label swap always last**, via `wfr label swap` — never `gh issue edit` directly. PR always **draft**.
+- **Never call `wfr implement complete` with known-failing tests, lint, or build.** Run the checks yourself first and fix them — `wfr` does not run or gate on checks.

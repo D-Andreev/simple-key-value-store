@@ -5,13 +5,13 @@
       "source": "D-Andreev/ai-workflow-routines",
       "sourceType": "github",
       "skillPath": "skills/workflow-clarify/SKILL.md",
-      "computedHash": "17f706eadc8c9b6ce696f2d027377c72be0724a81365b6a9bd4613920875f2ce"
+      "computedHash": "e9bb9c4efae5dc2a7b994d5c3a0b6ca4e9dcf1f8a0ed0fe7d05b82028529851c"
     },
     "workflow-close": {
       "source": "D-Andreev/ai-workflow-routines",
       "sourceType": "github",
       "skillPath": "skills/workflow-close/SKILL.md",
-      "computedHash": "f60521cae084796d0847f8d9ec87382b85c55300b76c0d909352fe05b8f4db7e"
+      "computedHash": "6a158d5bf0fd3d48c0e80c685a6800956518f2f3e3e73a38ca32aba0c65b7876"
     },
     "workflow-comprehension": {
       "source": "D-Andreev/ai-workflow-routines",
@@ -23,25 +23,25 @@
       "source": "D-Andreev/ai-workflow-routines",
       "sourceType": "github",
       "skillPath": "skills/workflow-implement/SKILL.md",
-      "computedHash": "92351d80ae86a6c1fd6b7cf650490c564b15520c38a03e7ce402ab30c51a3325"
+      "computedHash": "58d00ca87fb290dbbb65ae28216188dbd10f876a9389c877d905682579eb02f8"
     },
     "workflow-init": {
       "source": "D-Andreev/ai-workflow-routines",
       "sourceType": "github",
       "skillPath": "skills/workflow-init/SKILL.md",
-      "computedHash": "9eacefbd5b6d75c2b9f5d3dcd50037050cb850b8d920ad5c35a7b0bcc27bf582"
+      "computedHash": "fdb1861ab3afe7b5d30d63281c49245bfb3dfe0175a5751bfb20a5bfafb12f07"
     },
     "workflow-review": {
       "source": "D-Andreev/ai-workflow-routines",
       "sourceType": "github",
       "skillPath": "skills/workflow-review/SKILL.md",
-      "computedHash": "bd6ee3559d07466bc7015fe78c468c99f43a7dd70ac5a0157fe7a0826f92f3c2"
+      "computedHash": "8eb850f60629ead71f671f4ad4acce8aecf8749f67904985aa663d32387048d2"
     },
     "workflow-routines": {
       "source": "D-Andreev/ai-workflow-routines",
       "sourceType": "github",
       "skillPath": "skills/workflow-routines/SKILL.md",
-      "computedHash": "091ce65e117f4175b284a0fcac1f983a1a60713903ed222afc7af323b337f64a"
+      "computedHash": "145602e22ea7a2ddf67757be8c7771e54fb4c5cc4ca9bad52dc6797353f88d00"
     }
   }
 }
