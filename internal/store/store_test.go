@@ -2,7 +2,9 @@ package store
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
+	"sync"
 	"testing"
 )
 
@@ -107,6 +109,33 @@ func TestMemoryStore_List_ReturnsCopy(t *testing.T) {
 	if got != "bar" {
 		t.Errorf("internal state mutated via List() result: Get(foo) = %q, want %q", got, "bar")
 	}
+}
+
+// TestMemoryStore_ConcurrentAccess exercises Set/Get/Delete from many
+// goroutines at once. It doesn't assert on the interleaved values (there's
+// no deterministic outcome to check) — its job is to give `go test -race`
+// something to catch if MemoryStore's locking is ever broken.
+func TestMemoryStore_ConcurrentAccess(t *testing.T) {
+	s := NewMemoryStore()
+
+	const goroutines = 50
+	const opsPerGoroutine = 100
+
+	var wg sync.WaitGroup
+	wg.Add(goroutines)
+	for g := 0; g < goroutines; g++ {
+		go func(g int) {
+			defer wg.Done()
+			for i := 0; i < opsPerGoroutine; i++ {
+				key := fmt.Sprintf("key-%d", (g+i)%10)
+				s.Set(key, fmt.Sprintf("value-%d-%d", g, i))
+				_, _ = s.Get(key)
+				_ = s.Delete(key)
+				_ = s.List()
+			}
+		}(g)
+	}
+	wg.Wait()
 }
 
 var _ Store = (*MemoryStore)(nil)
