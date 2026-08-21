@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "issue_number": 11,
+  "pr_number": 12,
+  "review_head_sha": "e074dfda592c733d62a0b84265a14ee39b1682e2",
+  "verdict": "APPROVE WITH NOTES",
+  "created_at": "2026-08-21T08:09:40.466Z",
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "minor",
+      "summary": "New TestMemoryStore_ConcurrentAccess only catches locking regressions when run with `go test -race`; CI's Test step runs `go test ./...` without `-race`, so the test can't enforce the concurrency-safety AC in CI going forward",
+      "paths": [
+        ".github/workflows/ci.yml",
+        "internal/store/store_test.go"
+      ],
+      "required": false
+    }
+  ]
+}
