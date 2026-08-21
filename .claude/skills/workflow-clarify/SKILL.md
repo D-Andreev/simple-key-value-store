@@ -94,9 +94,9 @@ Same as A/B.
    One call: ensures/creates `workflow/state`, writes `state.json` per [fixture](../workflow-routines/fixtures/state-example-clarify-start.json), writes the initial `task.md`/`language.md`/`requirements.md` shells under `issues/{n}/`, creates an empty `metrics.jsonl`, and commits + pushes.
 5. **Post session comment** — pick a **fresh phrasing** from handoff-format example bank (or invent one). **Must include actual markdown links** (`[text](url)`, not prose mentions) to the session + **state tree** (`…/tree/workflow/state/issues/{n}`). Reference the issue topic when natural:
    ```bash
-   wfr issue comment --issue {n} --body "{session comment text}"
+   wfr issue comment --issue {n} --checkpoint clarify-session-start --body "{session comment text}"
    ```
-   Do **not** reuse the same clarify-start comment across issues.
+   `--checkpoint` records a marker in `state.json` history — a duplicate/retried call for the same issue becomes a no-op instead of posting a second comment. Do **not** reuse the same clarify-start comment across issues.
 6. Ask **first question in the session** (chat). Do not post it as an issue comment.
 
 ## Grilling loop

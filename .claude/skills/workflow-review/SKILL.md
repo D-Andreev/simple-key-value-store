@@ -45,8 +45,9 @@ State in the review-report header: **"Fresh-eyes: artifacts and diff only."**
 2. Checkout **`work_branch`** (`workflow/issue-{n}`); pull latest for diff/code.
 3. **Post session comment** — vary phrasing (handoff-format review start bank). Link session + PR:
    ```bash
-   wfr issue comment --issue {n} --body "{text}"
+   wfr issue comment --issue {n} --checkpoint review-session-start --body "{text}"
    ```
+   `--checkpoint` records a marker in `state.json` history — a duplicate/retried call for the same issue becomes a no-op instead of posting a second comment.
 4. **Start** — switch back to `workflow/state` if needed, then:
    ```bash
    wfr review start --issue {n}
@@ -62,7 +63,7 @@ State in the review-report header: **"Fresh-eyes: artifacts and diff only."**
    Reads `pr_number`/`pr_url` already recorded in `state.json` (set when implement opened the PR — nothing is looked up live on GitHub), validates `review-report.md` (structural + that its `## Verdict` section matches `--verdict` exactly), captures `review_head_sha` from the work branch's remote tip, finalizes `review-findings.json` (assigns `F1`…`Fn` ids, derives `required` from severity, injects `review_head_sha`/`pr_number`/`schema_version`/`created_at`), computes `critical_count`/`minor_count`/`notes_count` from the findings and appends `review_completed` to `metrics.jsonl`, updates `state.json` (`review_verdict`, `review_head_sha`, `pr_number`/`pr_url`, `status: done`, history), commits + pushes, posts the **one full-detail** comment on the **PR** (`gh pr comment` — never `gh pr review`), and **swaps labels last** (`workflow:human-review`). Fails closed — if validation or the commit fails, no comment and no label swap; if the comment fails, no label swap. Prints the PR URL.
 9. **Post short completion comment on the issue** — a one-liner (verdict + markdown link to the PR from step 8), not the full report:
    ```bash
-   wfr issue comment --issue {n} --body "{short text with PR link}"
+   wfr issue comment --issue {n} --checkpoint review-complete-comment --body "{short text with PR link}"
    ```
 10. **Stop.**
 

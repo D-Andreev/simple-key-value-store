@@ -35,8 +35,9 @@ If preconditions fail, post short issue comment via `wfr issue comment`. **Do no
 2. Verify `workflow/PROJECT.md` on `base_branch` (read via fetch/checkout of base or work branch after create).
 3. Post session comment — **vary phrasing** (handoff-format implement example bank). Must include an actual markdown link to the session (`[text]({session_url})`, not just prose mentioning it); work-branch link after create:
    ```bash
-   wfr issue comment --issue {n} --body "{session comment text}"
+   wfr issue comment --issue {n} --checkpoint implement-session-start --body "{session comment text}"
    ```
+   `--checkpoint` records a marker in `state.json` history — a duplicate/retried call for the same issue becomes a no-op instead of posting a second comment.
 4. **Start** — one call: verifies `requirements_approved: true` (aborts before touching anything otherwise), commits handoff start on `workflow/state` (`phase: implement`, `status: ai_running`, `work_branch`, history `started`), ensures `workflow/issue-{n}` exists (idempotent — creates from `base_branch` if missing, reuses it and records `work_branch_created` in history if newly created, otherwise leaves history untouched), and leaves you **checked out on the work branch**:
    ```bash
    wfr implement start --issue {n} --base-branch {base_branch}
@@ -68,20 +69,15 @@ Written by the model to `issues/{n}/implement-handoff.md` on **`workflow/state`*
 
 ## Complete sequence
 
-`wfr implement complete` can't post the completion comment or swap the label itself — both need the PR URL it creates, which doesn't exist until the call returns. So this is **three separate calls in order**, not one atomic one:
+One call does the whole sequence — pushes final work-branch commits, opens the draft PR (`gh pr create --draft --head workflow/issue-{n} --base {base_branch}`, capturing `pr_number`/`pr_url`), validates `implement-handoff.md`, updates `state.json` (`status: done`, `workflow_label: workflow:review`, `pr_number`, `pr_url`, history), commits + pushes on `workflow/state`, posts the **completion comment** (`--comment-body`, vary phrasing per the handoff-format implement complete bank), and **swaps labels last** (`workflow:review`). It fails closed: if any step errors, later steps (including the label swap) don't run — a failed comment leaves the label unswapped, and a bare retry after full success is rejected (`implement already completed for this issue`) instead of opening a second PR or reposting the comment.
 
-1. **Complete** — pushes final work-branch commits, opens the draft PR (`gh pr create --draft --head workflow/issue-{n} --base {base_branch}`, capturing `pr_number`/`pr_url`), validates `implement-handoff.md`, updates `state.json` (`status: done`, `workflow_label: workflow:review`, `pr_number`, `pr_url`, history), and commits + pushes on `workflow/state`. Prints the PR URL:
-   ```bash
-   wfr implement complete --issue {n} --base-branch {base_branch} --pr-title "{title}" --pr-body "{body}"
-   ```
-2. **Post completion comment** — vary phrasing (handoff-format implement complete bank), linking the draft PR URL from step 1:
-   ```bash
-   wfr issue comment --issue {n} --body "{text with the PR link}"
-   ```
-3. **Swap labels last** — `workflow:review`. **Stop.**
-   ```bash
-   wfr label swap --issue {n} --from workflow:implement --to workflow:review
-   ```
+`--comment-body` is a template, not the final text: write it with the literal token `{pr_url}` wherever the draft PR link goes (you don't know the real URL yet — the PR doesn't exist until this call creates it). `wfr` substitutes the real link before posting.
+
+```bash
+wfr implement complete --issue {n} --base-branch {base_branch} --pr-title "{title}" --pr-body "{body}" --comment-body "{varied text with the literal token {pr_url}}"
+```
+
+**Stop** once this succeeds. If it fails, the error says which step failed and whether the comment/label were applied — fix the cause and re-run rather than swapping labels or posting comments by hand.
 
 ## Writable locations
 
@@ -97,7 +93,7 @@ Written by the model to `issues/{n}/implement-handoff.md` on **`workflow/state`*
 - **Create the work branch at start** if missing; never a second work branch for the same issue — `wfr implement start` enforces this.
 - **Handoff only on `workflow/state`** — keep PR diffs free of `state.json` / handoff markdown.
 - **Commit handoff at start and complete** on `workflow/state`.
-- **Never put artifacts in issue comments** — post via `wfr issue comment`, short status only.
+- **Never put artifacts in issue comments** — session comment via `wfr issue comment`, completion comment via `wfr implement complete --comment-body`, both short status only.
 - If a `wfr` command fails (e.g. push fails), post a short failure comment via `wfr issue comment` and **stop**; do not advance labels.
-- **Label swap always last**, via `wfr label swap` — never `gh issue edit` directly. PR always **draft**.
+- **Label swap always last** — `wfr implement complete` does this internally, failing closed if any earlier step errored. Never `gh issue edit` or `wfr label swap` by hand for this transition. PR always **draft**.
 - **Never call `wfr implement complete` with known-failing tests, lint, or build.** Run the checks yourself first and fix them — `wfr` does not run or gate on checks.

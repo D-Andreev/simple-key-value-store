@@ -11,14 +11,14 @@ When a phase **advances**, **label swap is usually last** — after handoff comm
 **Clarify start order:** label swap → **ensure `workflow/state` + init handoff commit** → session comment → Q1 **in session**.
 
 ```bash
-# implement complete — comment needs the PR URL this step creates, so it's 3 separate calls
-# 1. wfr implement complete --issue {n} …  (pushes work branch, opens draft PR, commits + pushes state.json)
-# 2. wfr issue comment --issue {n} --body "…"  (varied human comment, links the PR)
-# 3. wfr label swap --issue {n} --from workflow:implement --to workflow:review  ← LAST
+# implement complete — opens the PR itself, so the comment template uses the
+# literal token {pr_url} and wfr substitutes it after creating the PR; one atomic call
+# wfr implement complete --issue {n} … --comment-body "… {pr_url} …"
+#   → pushes work branch, opens draft PR, commits + pushes state.json, posts the completion comment, swaps label ← LAST — internally
 
-# review complete — PR already exists (found, not created), so this is one atomic call
+# review complete — PR number/URL already recorded in state.json (set by implement), no live lookup; one atomic call
 # wfr review complete --issue {n} --verdict "…" --summary "…"
-#   → finds PR, finalizes handoff, posts the one PR comment, swaps label ← LAST — internally
+#   → reads pr_number/pr_url from state.json, finalizes handoff, posts the one PR comment, swaps label ← LAST — internally
 
 # close complete — merged PR already exists, so this is one atomic call too
 # wfr close complete --issue {n} --summary "…"

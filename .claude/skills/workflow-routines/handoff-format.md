@@ -106,7 +106,7 @@ Then `---` and full requirements body. If over ~65k chars, post AC + clarificati
 **Implement** — Building against the approved AC. I'll mirror existing patterns where I can. [`workflow/issue-42`]({branch_url}) · [session]({session_url}).
 ```
 
-**Complete — example bank:**
+**Complete — example bank** (`{pr_url}` here is the literal token `wfr implement complete --comment-body` expects — it substitutes the real link itself, you don't know it yet when you write the text):
 
 ```markdown
 **Draft PR is up** — [#17]({pr_url}) has the changes; left as **draft** so you can kick the tires locally before review.
@@ -200,7 +200,7 @@ wfr clarify init --issue {n} --issue-url {issue_url} --title "{title}" --base-br
 
 This writes `state.json`, `task.md`, `language.md`, `requirements.md` (initial shell), and an empty `metrics.jsonl` under `issues/{n}/`, then commits with message `workflow(issue-{n}): clarify — init handoff` and pushes.
 
-3. Post short session comment with **both markdown links** (session + state tree) via `wfr issue comment --issue {n} --body "{text}"`. See **Clarify start**.
+3. Post short session comment with **both markdown links** (session + state tree) via `wfr issue comment --issue {n} --checkpoint clarify-session-start --body "{text}"`. See **Clarify start**.
 4. Ask first question **in the session** (not as an issue comment). Wait for the human's **session** reply.
 
 **Reading product code during clarify:** working tree is `workflow/state` (no app source). Use `git show origin/{base_branch}:path` / `git ls-tree` — do not checkout `base_branch`.
@@ -243,10 +243,10 @@ This updates `state.json` on `workflow/state` (`phase: implement`, `work_branch`
 4. **At phase complete** — switch to `workflow/state` (see below), write `implement-handoff.md`, then:
 
 ```bash
-wfr implement complete --issue {n} --base-branch {base_branch} --pr-title "{title}" --pr-body "{body}"
+wfr implement complete --issue {n} --base-branch {base_branch} --pr-title "{title}" --pr-body "{body}" --comment-body "{varied text with the literal token {pr_url}}"
 ```
 
-Pushes the work branch, opens the draft PR, validates `implement-handoff.md`, updates `state.json`, commits + pushes, and prints the PR URL. It does **not** post the completion comment or swap the label — post via `wfr issue comment` (linking that PR URL) and swap via `wfr label swap --from workflow:implement --to workflow:review` as separate follow-up calls, since both need the PR URL this call creates.
+Pushes the work branch, opens the draft PR, validates `implement-handoff.md`, updates `state.json`, commits + pushes, posts the completion comment (`--comment-body` — write it with the literal token `{pr_url}` where the link goes; the PR doesn't exist until this call creates it, so `wfr` substitutes the real URL before posting), and swaps to `workflow:review` **last**. Fails closed — if the comment post fails, the label is not swapped. A bare retry after full success is rejected (`implement already completed for this issue`) rather than opening a second PR or reposting the comment.
 
 ### Switching between state and work branches
 
