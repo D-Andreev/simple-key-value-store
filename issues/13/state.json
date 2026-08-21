@@ -5,20 +5,20 @@
   "mode": "feature",
   "task": "[Feature]: On disk persistance",
   "phase": "review",
-  "status": "ai_running",
-  "workflow_label": "workflow:review",
+  "status": "done",
+  "workflow_label": "workflow:human-review",
   "base_branch": "main",
   "state_branch": "workflow/state",
   "work_branch": "workflow/issue-13",
   "handoff_path": "issues/13",
   "requirements_approved": true,
   "clarify_rounds": 4,
-  "review_verdict": null,
-  "review_head_sha": null,
+  "review_verdict": "APPROVE WITH NOTES",
+  "review_head_sha": "6f3d4a7de4df50f5348981c3b145c7aca7e90cac",
   "pr_number": 14,
   "pr_url": "https://github.com/D-Andreev/simple-key-value-store/pull/14",
   "created_at": "2026-08-21T09:49:14.028Z",
-  "updated_at": "2026-08-21T10:09:39.442Z",
+  "updated_at": "2026-08-21T10:11:51.691Z",
   "last_session_url": null,
   "history": [
     {
@@ -77,6 +77,16 @@
       "phase": "review",
       "event": "started",
       "at": "2026-08-21T10:09:39.442Z"
+    },
+    {
+      "phase": "review",
+      "event": "phase_completed",
+      "at": "2026-08-21T10:11:51.691Z"
+    },
+    {
+      "phase": "review",
+      "event": "pr_comment_posted",
+      "at": "2026-08-21T10:11:51.691Z"
     }
   ],
   "human_feedback": [],
