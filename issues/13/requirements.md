@@ -65,6 +65,8 @@ Related: internal/store/store.go defines the Store interface this would implemen
 - [ ] `main.go` pre-scans `os.Args` for `--data-dir` to select `MemoryStore` vs. `FileStore` before calling `cli.NewRootCmd`; `--data-dir` is also registered as a persistent flag on root so `kvs --help` documents it
 - [ ] `FileStore` auto-creates `--data-dir` (and `store.json`) on startup if missing
 - [ ] `FileStore` fails loudly (non-zero exit, clear stderr message) if `store.json` exists but contains invalid JSON — no silent fallback to an empty store
+- [ ] Unit tests for `FileStore` mirroring `store_test.go` coverage for `MemoryStore` (set/get, missing-key get/delete, list, overwrite)
+- [ ] e2e test covering `set` → restart process → `get` (new `kvs` process, same `--data-dir`, sees the persisted value)
 - [ ] `go test ./...` passes, including new `FileStore` tests
 
 ## Approved by human
