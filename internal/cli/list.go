@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/spf13/cobra"
@@ -21,8 +22,15 @@ func newListCmd(s store.Store) *cobra.Command {
 			}
 			sort.Strings(keys)
 
+			// cmd.Printf falls back to stderr (not stdout) when no
+			// explicit output writer is set, which is the case in the
+			// real binary — write to OutOrStdout() directly so listed
+			// pairs actually land on stdout.
+			out := cmd.OutOrStdout()
 			for _, k := range keys {
-				cmd.Printf("%s=%s\n", k, items[k])
+				if _, err := fmt.Fprintf(out, "%s=%s\n", k, items[k]); err != nil {
+					return err
+				}
 			}
 			return nil
 		},

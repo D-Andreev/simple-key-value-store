@@ -14,8 +14,10 @@ var ErrKeyNotFound = errors.New("key not found")
 // Store abstracts key/value storage. Keys and values are strings.
 // Implementations must be safe for concurrent use.
 type Store interface {
-	// Set stores value under key, overwriting any existing value.
-	Set(key, value string)
+	// Set stores value under key, overwriting any existing value. It
+	// returns an error if the value could not be durably stored (for
+	// example, a disk write failure in a persistent implementation).
+	Set(key, value string) error
 	// Get returns the value stored under key, or ErrKeyNotFound if it
 	// does not exist.
 	Get(key string) (string, error)
@@ -39,11 +41,13 @@ func NewMemoryStore() *MemoryStore {
 	return &MemoryStore{data: make(map[string]string)}
 }
 
-// Set implements Store.
-func (s *MemoryStore) Set(key, value string) {
+// Set implements Store. MemoryStore holds everything in process memory, so
+// it never fails to store a value and always returns a nil error.
+func (s *MemoryStore) Set(key, value string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.data[key] = value
+	return nil
 }
 
 // Get implements Store.

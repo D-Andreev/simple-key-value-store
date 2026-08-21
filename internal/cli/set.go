@@ -12,7 +12,10 @@ func newSetCmd(s store.Store) *cobra.Command {
 		Short: "Set a key to a value",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			s.Set(args[0], args[1])
+			if err := s.Set(args[0], args[1]); err != nil {
+				cmd.PrintErrln(err)
+				return err
+			}
 			return nil
 		},
 	}

@@ -63,7 +63,9 @@ func TestGetCmd(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := store.NewMemoryStore()
 			for k, v := range tt.seed {
-				s.Set(k, v)
+				if err := s.Set(k, v); err != nil {
+					t.Fatalf("Set(%q, %q) returned unexpected error: %v", k, v, err)
+				}
 			}
 
 			stdout, stderr, err := runWithStore(t, s, []string{"get", tt.key})
@@ -89,7 +91,9 @@ func TestGetCmd(t *testing.T) {
 func TestDeleteCmd(t *testing.T) {
 	t.Run("existing key", func(t *testing.T) {
 		s := store.NewMemoryStore()
-		s.Set("foo", "bar")
+		if err := s.Set("foo", "bar"); err != nil {
+			t.Fatalf("Set(foo, bar) returned unexpected error: %v", err)
+		}
 
 		_, stderr, err := runWithStore(t, s, []string{"delete", "foo"})
 		if err != nil {
@@ -131,7 +135,9 @@ func TestListCmd(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := store.NewMemoryStore()
 			for k, v := range tt.seed {
-				s.Set(k, v)
+				if err := s.Set(k, v); err != nil {
+					t.Fatalf("Set(%q, %q) returned unexpected error: %v", k, v, err)
+				}
 			}
 
 			stdout, stderr, err := runWithStore(t, s, []string{"list"})

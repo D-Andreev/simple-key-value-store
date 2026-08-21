@@ -22,7 +22,9 @@ func TestMemoryStore_SetGet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := NewMemoryStore()
-			s.Set(tt.key, tt.value)
+			if err := s.Set(tt.key, tt.value); err != nil {
+				t.Fatalf("Set(%q, %q) returned unexpected error: %v", tt.key, tt.value, err)
+			}
 
 			got, err := s.Get(tt.key)
 			if err != nil {
@@ -46,7 +48,9 @@ func TestMemoryStore_Get_MissingKey(t *testing.T) {
 
 func TestMemoryStore_Delete(t *testing.T) {
 	s := NewMemoryStore()
-	s.Set("foo", "bar")
+	if err := s.Set("foo", "bar"); err != nil {
+		t.Fatalf("Set(foo, bar) returned unexpected error: %v", err)
+	}
 
 	if err := s.Delete("foo"); err != nil {
 		t.Fatalf("Delete(foo) returned unexpected error: %v", err)
@@ -84,7 +88,9 @@ func TestMemoryStore_List(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := NewMemoryStore()
 			for k, v := range tt.set {
-				s.Set(k, v)
+				if err := s.Set(k, v); err != nil {
+					t.Fatalf("Set(%q, %q) returned unexpected error: %v", k, v, err)
+				}
 			}
 
 			got := s.List()
@@ -97,7 +103,9 @@ func TestMemoryStore_List(t *testing.T) {
 
 func TestMemoryStore_List_ReturnsCopy(t *testing.T) {
 	s := NewMemoryStore()
-	s.Set("foo", "bar")
+	if err := s.Set("foo", "bar"); err != nil {
+		t.Fatalf("Set(foo, bar) returned unexpected error: %v", err)
+	}
 
 	list := s.List()
 	list["foo"] = "mutated"
@@ -128,7 +136,7 @@ func TestMemoryStore_ConcurrentAccess(t *testing.T) {
 			defer wg.Done()
 			for i := 0; i < opsPerGoroutine; i++ {
 				key := fmt.Sprintf("key-%d", (g+i)%10)
-				s.Set(key, fmt.Sprintf("value-%d-%d", g, i))
+				_ = s.Set(key, fmt.Sprintf("value-%d-%d", g, i))
 				_, _ = s.Get(key)
 				_ = s.Delete(key)
 				_ = s.List()

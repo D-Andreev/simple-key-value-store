@@ -17,6 +17,8 @@ func newDeleteCmd(s store.Store) *cobra.Command {
 			if err := s.Delete(args[0]); err != nil {
 				if errors.Is(err, store.ErrKeyNotFound) {
 					cmd.PrintErrln("key not found")
+				} else {
+					cmd.PrintErrln(err)
 				}
 				return err
 			}

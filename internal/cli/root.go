@@ -18,6 +18,15 @@ func NewRootCmd(s store.Store) *cobra.Command {
 		SilenceErrors: true,
 	}
 
+	// --data-dir selects on-disk persistence (a FileStore backed by
+	// <data-dir>/store.json) instead of the default in-memory-only
+	// store. Cobra only parses flags once root.Execute() runs, but the
+	// Store passed into NewRootCmd already has to exist by then — so
+	// main.go pre-scans os.Args for --data-dir and constructs the store
+	// before calling NewRootCmd. Registering it here doesn't drive that
+	// choice; it exists purely so --data-dir shows up in --help/usage.
+	root.PersistentFlags().String("data-dir", "", "directory for on-disk persistence (default: in-memory only)")
+
 	root.AddCommand(newSetCmd(s))
 	root.AddCommand(newGetCmd(s))
 	root.AddCommand(newDeleteCmd(s))
