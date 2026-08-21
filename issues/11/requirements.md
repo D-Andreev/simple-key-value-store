@@ -40,9 +40,10 @@ _(none)_
 ## Clarifications
 | # | Question | Answer | Recommended |
 |---|----------|--------|-------------|
+| 1 | Should `Delete` on a missing key become idempotent (return `nil`) per the issue's literal wording, or keep the existing `ErrKeyNotFound` behavior the CLI already relies on for its "key not found" message? | Keep `Delete` erroring with `ErrKeyNotFound` on a missing key — no behavior change. | Keep `Delete` erroring with `ErrKeyNotFound` on a missing key (preserves existing CLI UX and test suite; "idempotent" read as end-state, not "always returns nil"). |
 
 ## Acceptance criteria
-- [ ] ...
+- [ ] Deleting a key removes it (subsequent `Get` returns `ErrKeyNotFound`); deleting a missing key also returns `ErrKeyNotFound` (unchanged from current behavior) — not a breaking change
 
 ## Approved by human
 - [ ] Pending — say `approve requirements` in the session when ready

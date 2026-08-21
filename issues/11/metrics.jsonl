@@ -1,0 +1,1 @@
+{"schema_version":1,"ts":"2026-08-21T08:00:38.096Z","issue_number":11,"phase":"clarify","event":"clarify_turn","session_id":null,"q_index":1,"category":"edge_case","recommendation_outcome":"accepted_recommendation","question":"Should Delete on a missing key become idempotent (nil) per the issue wording, or keep the existing ErrKeyNotFound behavior the CLI relies on?"}
