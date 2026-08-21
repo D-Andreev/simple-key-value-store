@@ -54,9 +54,13 @@ Related: internal/store/store.go defines the Store interface this would implemen
 ## Clarifications
 | # | Question | Answer | Recommended |
 |---|----------|--------|-------------|
+| 1 | `kvs` is a one-shot CLI (each invocation is a fresh process that exits after one command), not a daemon. Should `FileStore` flush synchronously to disk on every `Set`/`Delete`, before the command returns, rather than periodic/batched flush? | Yes — synchronous flush on every mutating call. No batching/async flush; the "periodic/batched flush — TBD" option in the original ask is dropped since there's no live process to defer a flush to. | Yes |
 
 ## Acceptance criteria
-- [ ] ...
+- [ ] Data set via `kvs set` is retrievable via `kvs get` after the process restarts, when `--data-dir` is provided
+- [ ] Without `--data-dir`, behavior is unchanged (in-memory only, matches current README)
+- [ ] `FileStore.Set`/`FileStore.Delete` write the full JSON snapshot to disk synchronously, before returning — no batched/periodic flush
+- [ ] `go test ./...` passes, including new `FileStore` tests
 
 ## Approved by human
 - [ ] Pending — say `approve requirements` in the session when ready
