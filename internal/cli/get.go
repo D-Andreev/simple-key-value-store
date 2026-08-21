@@ -2,6 +2,7 @@ package cli
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/spf13/cobra"
 
@@ -21,8 +22,12 @@ func newGetCmd(s store.Store) *cobra.Command {
 				}
 				return err
 			}
-			cmd.Println(value)
-			return nil
+			// cmd.Println falls back to stderr (not stdout) when no
+			// explicit output writer is set, which is the case in the
+			// real binary — write to OutOrStdout() directly so the
+			// value actually lands on stdout.
+			_, err = fmt.Fprintln(cmd.OutOrStdout(), value)
+			return err
 		},
 	}
 }
