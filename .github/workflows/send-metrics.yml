@@ -1,0 +1,51 @@
+name: Send Workflow Metrics to Honeycomb
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  send-metrics:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout workflow-routines
+        uses: actions/checkout@v4
+        with:
+          path: workflow-routines
+
+      - name: Fetch workflow/state
+        run: |
+          cd workflow-routines
+          git fetch origin workflow/state:workflow-state --depth=1 2>/dev/null || true
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Send to Honeycomb
+        env:
+          HONEYCOMB_KEY: ${{ secrets.HONEYCOMB_API_KEY }}
+          HONEYCOMB_DATASET: ${{ secrets.HONEYCOMB_DATASET || 'workflow-metrics' }}
+        run: |
+          cd workflow-routines
+
+          if [ -z "$HONEYCOMB_KEY" ]; then
+            echo "⚠️  HONEYCOMB_API_KEY secret not configured"
+            exit 0
+          fi
+
+          if [ ! -d "workflow-state" ]; then
+            echo "ℹ️  No workflow/state data to send"
+            exit 0
+          fi
+
+          node bin/send-to-honeycomb.js \
+            --honeycomb-key "$HONEYCOMB_KEY" \
+            --dataset "$HONEYCOMB_DATASET" \
+            --repo "${{ github.repository }}" \
+            workflow-state
