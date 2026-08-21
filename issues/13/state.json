@@ -18,7 +18,7 @@
   "pr_number": null,
   "pr_url": null,
   "created_at": "2026-08-21T09:49:14.028Z",
-  "updated_at": "2026-08-21T09:49:14.028Z",
+  "updated_at": "2026-08-21T09:49:36.424Z",
   "last_session_url": null,
   "history": [
     {
@@ -32,6 +32,11 @@
       "event": "started",
       "at": "2026-08-21T09:49:14.028Z",
       "note": "base_branch=main"
+    },
+    {
+      "phase": "clarify",
+      "event": "comment:clarify-session-start",
+      "at": "2026-08-21T09:49:36.424Z"
     }
   ],
   "human_feedback": [],
